@@ -2,17 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Message Analyzer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>Smart Message Analyzer</h1>
+    <p class="description">Apne message ko paste karein aur dekhein kya message safe hai, scam hai ya sarkari hai. Sab kuch aasaan Hindi/Hinglish me samjha jayega!</p>
 
     <textarea id="msg" rows="6" placeholder="Yahan apna message paste karo..."></textarea>
-    <button onclick="sendMsg()">Analyze</button>
+
+    <div class="controls">
+      <button onclick="sendMsg()">Analyze</button>
+      <button onclick="clearMsg()">Clear</button>
+    </div>
 
     <div id="result"></div>
+
+    <div class="feedback">
+      <p>Feedback dijiye:</p>
+      <button onclick="sendFeedback('👍')">👍 Useful</button>
+      <button onclick="sendFeedback('👎')">👎 Not Useful</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
