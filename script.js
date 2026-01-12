@@ -5,7 +5,8 @@ async function sendMsg() {
     return;
   }
 
-  const API_URL = "https://umar-k20u.onrender.com/chat"; // Backend URL
+  // Backend URL - fallback included
+  const API_URL = window.API_URL || "https://umar-k20u.onrender.com/chat";
 
   try {
     const res = await fetch(API_URL, {
@@ -14,26 +15,25 @@ async function sendMsg() {
       body: JSON.stringify({ message })
     });
 
+    if (!res.ok) throw new Error("Backend se response nahi aaya");
+
     const data = await res.json();
     
-    // Line by line output
     const replyDiv = document.getElementById("result");
     replyDiv.innerHTML = "";  // Clear previous
 
+    // Line by line output with color coding
     data.reply.split("\n").forEach(line => {
       const p = document.createElement("p");
-
-      // Color coding based on keywords
       if (line.includes("🔴")) p.style.color = "red";
       else if (line.includes("🏛")) p.style.color = "blue";
       else if (line.includes("🟢")) p.style.color = "green";
       else p.style.color = "black";
-
-      p.innerHTML = line;
+      p.textContent = line; // safer than innerHTML
       replyDiv.appendChild(p);
     });
 
   } catch (err) {
-    document.getElementById("result").innerHTML = "Error: " + err;
+    document.getElementById("result").textContent = "Error: " + err;
   }
 }
