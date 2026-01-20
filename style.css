@@ -1,93 +1,46 @@
-body {
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #ece9e6, #ffffff);
-  margin: 0;
-  padding: 0;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Message Analyzer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
 
-.container {
-  max-width: 900px;
-  margin: 50px auto;
-  background: #fff;
-  padding: 30px 40px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-}
+  <header class="top-bar">
+    <h1>🛡 Smart Message Analyzer</h1>
+    <p>Fake, Scam aur Real messages ko smart tarike se pehchane</p>
+  </header>
 
-h1 {
-  text-align: center;
-  color: #34495e;
-}
+  <main class="app">
+    <section class="input-section">
+      <textarea id="msg" placeholder="📩 Yahan message paste karein..."></textarea>
 
-.description {
-  text-align: center;
-  font-size: 16px;
-  color: #7f8c8d;
-  margin-bottom: 20px;
-}
+      <div class="controls">
+        <button class="primary" onclick="sendMsg()">Analyze</button>
+        <button class="danger" onclick="clearMsg()">Clear</button>
+      </div>
+    </section>
 
-textarea {
-  width: 100%;
-  font-size: 16px;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #bdc3c7;
-  resize: vertical;
-}
+    <section class="result-section">
+      <h2>🔍 Analysis Result</h2>
+      <div id="result" class="result-box">
+        <p class="muted">Result yahan dikhai dega…</p>
+      </div>
+    </section>
 
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
+    <section class="feedback">
+      <span>Was this helpful?</span>
+      <button onclick="sendFeedback('👍')">👍</button>
+      <button onclick="sendFeedback('👎')">👎</button>
+    </section>
+  </main>
 
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border-radius: 6px;
-  border: none;
-  transition: 0.2s;
-}
+  <footer class="footer">
+    <p>© 2026 Smart Message Analyzer | Stay Safe Online</p>
+  </footer>
 
-button:hover {
-  opacity: 0.9;
-}
-
-.controls button:first-child {
-  background-color: #3498db;
-  color: #fff;
-}
-
-.controls button:last-child {
-  background-color: #e74c3c;
-  color: #fff;
-}
-
-#result {
-  margin-top: 25px;
-  padding: 15px;
-  border-radius: 10px;
-  background: #f7f9fa;
-  min-height: 150px;
-  white-space: pre-wrap;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #2c3e50;
-}
-
-.feedback {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.feedback button {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.feedback button:last-child {
-  background-color: #e67e22;
-}
+  <script src="script.js"></script>
+</body>
+</html>
