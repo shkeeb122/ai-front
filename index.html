@@ -7,25 +7,37 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
+  <header class="top-bar">
     <h1>Smart Message Analyzer</h1>
-    <p class="description">Apne message ko paste karein aur dekhein kya message safe hai, scam hai ya sarkari hai. Sab kuch aasaan Hindi/Hinglish me samjha jayega!</p>
+    <p>Apne message ko paste karein aur dekhein kya message safe hai, scam hai ya sarkari hai. Hindi/Hinglish me aasaan samjha jaayega!</p>
+  </header>
 
-    <textarea id="msg" rows="6" placeholder="Yahan apna message paste karo..."></textarea>
+  <main class="app">
+    <section class="input-section">
+      <textarea id="msg" rows="6" placeholder="Yahan apna message paste karo..."></textarea>
+      <div class="controls">
+        <button class="primary" onclick="sendMsg()">Analyze</button>
+        <button class="danger" onclick="clearMsg()">Clear</button>
+      </div>
+    </section>
 
-    <div class="controls">
-      <button onclick="sendMsg()">Analyze</button>
-      <button onclick="clearMsg()">Clear</button>
-    </div>
+    <section class="result-section">
+      <h2>Result:</h2>
+      <div id="result" class="result-box">
+        <p class="muted">Result yahan dikhai dega…</p>
+      </div>
+    </section>
 
-    <div id="result"></div>
-
-    <div class="feedback">
+    <section class="feedback">
       <p>Feedback dijiye:</p>
       <button onclick="sendFeedback('👍')">👍 Useful</button>
       <button onclick="sendFeedback('👎')">👎 Not Useful</button>
-    </div>
-  </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © 2026 Smart Message Analyzer
+  </footer>
 
   <script src="script.js"></script>
 </body>
