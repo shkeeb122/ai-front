@@ -1,126 +1,109 @@
-* {
+  * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  background: #f4f6f8;
-  color: #2c3e50;
+  font-family: system-ui, sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
 }
 
 /* ===== TOP BAR ===== */
 .top-bar {
-  background: #0f172a;
-  color: #fff;
-  padding: 20px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
+  padding: 22px;
   text-align: center;
 }
 
 .top-bar h1 {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
 }
 
-.top-bar p {
-  margin-top: 6px;
-  font-size: 14px;
-  color: #cbd5e1;
-}
-
-/* ===== MAIN APP ===== */
+/* ===== MAIN ===== */
 .app {
-  max-width: 1100px;
+  max-width: 1000px;
   margin: auto;
   padding: 20px;
 }
 
-/* ===== ALERT / INPUT ===== */
-.alert-section, .due-section, .input-section {
-  background: #fff;
+.alert-section,
+.due-section {
+  background: white;
   padding: 20px;
   margin-bottom: 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.alert-section h2, .due-section h2, .input-section h2 {
-  margin-bottom: 15px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 /* ===== FORM ===== */
 label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-size: 14px;
 }
 
-input, select, textarea {
+input, select {
   width: 100%;
-  padding: 10px;
-  margin-top: 3px;
+  padding: 11px;
+  margin-top: 4px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
-  font-size: 15px;
 }
 
-/* ===== BUTTONS ===== */
+/* ===== BUTTON ===== */
 button {
-  padding: 10px 20px;
-  font-size: 15px;
+  padding: 11px 18px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: 0.2s;
-  margin-top: 8px;
+  margin-top: 10px;
+  font-size: 15px;
 }
 
-button:hover {
-  transform: scale(1.03);
+.primary {
+  background: #2563eb;
+  color: white;
 }
 
-.primary { background: #2563eb; color: #fff; }
-.secondary { background: #06b6d4; color: #fff; }
-.danger { background: #dc2626; color: #fff; }
+.secondary {
+  background: #06b6d4;
+  color: white;
+}
 
-/* ===== RESULT / ALERT CARDS ===== */
-.result-box, #due_alerts {
-  background: #f9fafb;
-  padding: 15px;
+/* ===== ALERT CARD ===== */
+#due_alerts {
+  background: #f8fafc;
+  padding: 14px;
   border-radius: 10px;
   min-height: 80px;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
-.result-box p, .alert-card p {
-  margin: 5px 0;
-  line-height: 1.5;
+.alert-card {
+  background: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border-left: 4px solid #2563eb;
 }
 
 .muted {
   color: #94a3b8;
 }
 
-.alert-card {
-  background: #fff;
-  padding: 12px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-}
-
 /* ===== FOOTER ===== */
 .footer {
-  margin-top: 40px;
-  padding: 15px;
   text-align: center;
+  padding: 20px;
   font-size: 13px;
   color: #64748b;
 }
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
-  button { width: 100%; }
-  .top-bar h1 { font-size: 22px; }
+  button {
+    width: 100%;
+  }
 }
