@@ -3,67 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart Alert & Message Analyzer</title>
+  <title>Smart Alert System</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <header class="top-bar">
-    <h1>Smart Alert & Message Analyzer</h1>
-    <p>Apne alerts aur messages ko manage karein. Alerts ka AI guidance bhi milega. Hindi/Hinglish me simple samjhaya jaayega!</p>
+    <h1>Smart Alert & Reminder</h1>
+    <p>Apne important kaam ke liye smart reminder set karein.</p>
   </header>
 
   <main class="app">
 
-    <!-- ===== Add Alert Section ===== -->
+    <!-- ===== Add Alert ===== -->
     <section class="alert-section">
-      <h2>Add New Alert</h2>
+      <h2>➕ Add New Reminder</h2>
+
       <label>Alert Type:
         <select id="alert_type">
           <option value="subscription">Subscription</option>
-          <option value="address_change">Address Change</option>
-          <option value="tax_bill">Tax / Bill</option>
-          <option value="insurance_loan">Insurance / Loan</option>
-          <option value="document_event">Document Event</option>
+          <option value="bill">Bill Payment</option>
+          <option value="insurance">Insurance</option>
+          <option value="document">Document</option>
+          <option value="custom">Custom</option>
         </select>
       </label>
-      <label>Title: <input type="text" id="alert_title" placeholder="Alert title"></label>
+
+      <label>Title:
+        <input type="text" id="alert_title" placeholder="Jaise: Mobile Recharge">
+      </label>
+
       <label>Country:
         <select id="alert_country">
-          <option value="USA">USA</option>
           <option value="India">India</option>
+          <option value="USA">USA</option>
         </select>
       </label>
-      <label>Due Date: <input type="date" id="alert_due"></label>
-      <label>Reminder Days: <input type="number" id="alert_reminder" value="1"></label>
-      <button class="primary" onclick="submitAlert()">Add Alert</button>
+
+      <label>Due Date:
+        <input type="date" id="alert_due">
+      </label>
+
+      <label>Reminder Days Before:
+        <input type="number" id="alert_reminder" value="1">
+      </label>
+
+      <button class="primary" onclick="submitAlert()">Save Reminder</button>
     </section>
 
-    <!-- ===== Due Alerts Section ===== -->
+    <!-- ===== Due Alerts ===== -->
     <section class="due-section">
-      <h2>Due Alerts</h2>
-      <div id="due_alerts">
-        <p class="muted">Due alerts yahan dikhai denge…</p>
-      </div>
-      <button class="secondary" onclick="showDueAlerts()">Refresh Alerts</button>
-    </section>
+      <h2>⏰ Upcoming Reminders</h2>
 
-    <!-- ===== Message Analyzer Section ===== -->
-    <section class="input-section">
-      <h2>Message Analyzer</h2>
-      <textarea id="msg" rows="6" placeholder="Yahan apna message paste karo..."></textarea>
-      <div class="controls">
-        <button class="primary" onclick="sendMsg()">Analyze</button>
-        <button class="danger" onclick="clearMsg()">Clear</button>
+      <div id="due_alerts">
+        <p class="muted">Yahan reminders dikhai denge…</p>
       </div>
-      <div id="result" class="result-box">
-        <p class="muted">Result yahan dikhai dega…</p>
-      </div>
+
+      <button class="secondary" onclick="showDueAlerts()">Refresh</button>
     </section>
 
   </main>
 
   <footer class="footer">
-    © 2026 Smart Alert & Message Analyzer
+    © 2026 Smart Reminder System
   </footer>
 
   <script src="script.js"></script>
