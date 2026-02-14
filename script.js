@@ -1,6 +1,6 @@
 const API_URL = "https://umar-k20u.onrender.com";
 
-// ================== ALERT FUNCTIONS ==================
+// ================== ADD ALERT ==================
 async function submitAlert() {
   const type = document.getElementById("alert_type").value;
   const title = document.getElementById("alert_title").value.trim();
@@ -9,7 +9,7 @@ async function submitAlert() {
   const reminder = document.getElementById("alert_reminder").value;
 
   if (!title || !due) {
-    alert("⚠️ Title aur Due Date dalna zaruri hai!");
+    alert("⚠️ Title aur Due Date zaruri hai!");
     return;
   }
 
@@ -28,92 +28,51 @@ async function submitAlert() {
     });
 
     const data = await res.json();
-    alert(data.reply);
+    alert(data.reply || "✅ Reminder save ho gaya!");
     showDueAlerts();
 
   } catch (err) {
-    alert("❌ Error aaya, thodi der baad try karein.");
+    alert("❌ Server error. Baad me try karein.");
     console.error(err);
   }
 }
 
+// ================== SHOW ALERTS ==================
 async function showDueAlerts() {
   const container = document.getElementById("due_alerts");
-  container.innerHTML = "<p class='muted'>⏳ Alerts load ho rahe hain…</p>";
+  container.innerHTML = "<p class='muted'>⏳ Load ho raha hai…</p>";
 
   try {
     const res = await fetch(`${API_URL}/due_alerts`);
     const alerts = await res.json();
 
     if (!alerts.length) {
-      container.innerHTML = "<p class='muted'>Koi due alerts nahi hain.</p>";
+      container.innerHTML = "<p class='muted'>Koi reminder nahi hai.</p>";
       return;
     }
 
     container.innerHTML = "";
+
     alerts.forEach(a => {
       const div = document.createElement("div");
-      div.classList.add("alert-card");
+      div.className = "alert-card";
+
       div.innerHTML = `
-        <h3>${a.alert.title} (${a.alert.type})</h3>
-        <p>Country: ${a.alert.country}</p>
-        <p>Due: ${a.alert.due_date}</p>
-        <p>Reminder: ${a.alert.reminder_days} day(s)</p>
-        <p><strong>AI Guidance:</strong> ${a.guidance}</p>
+        <h3>${a.alert.title}</h3>
+        <p><b>Type:</b> ${a.alert.type}</p>
+        <p><b>Country:</b> ${a.alert.country}</p>
+        <p><b>Due Date:</b> ${a.alert.due_date}</p>
+        <p><b>Reminder:</b> ${a.alert.reminder_days} day(s) before</p>
       `;
+
       container.appendChild(div);
     });
 
   } catch (err) {
-    container.innerHTML = "<p style='color:red'>❌ Alerts fetch error</p>";
+    container.innerHTML = "<p style='color:red'>❌ Fetch error</p>";
     console.error(err);
   }
 }
 
-// ================== MESSAGE ANALYZER FUNCTIONS ==================
-async function sendMsg() {
-  const message = document.getElementById("msg").value.trim();
-  const resultDiv = document.getElementById("result");
-
-  if (!message) {
-    alert("⚠️ Message dalna zaroori hai!");
-    return;
-  }
-
-  resultDiv.innerHTML = "<p class='muted'>⏳ Message analyze ho raha hai…</p>";
-
-  try {
-    const res = await fetch(`${API_URL}/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await res.json();
-    resultDiv.innerHTML = "";
-
-    data.reply.split("\n").forEach(line => {
-      const p = document.createElement("p");
-
-      if (line.includes("🔴")) p.style.color = "#dc2626";
-      else if (line.includes("🟡")) p.style.color = "#d97706";
-      else if (line.includes("🟢")) p.style.color = "#16a34a";
-      else p.style.color = "#1f2937";
-
-      p.textContent = line;
-      resultDiv.appendChild(p);
-    });
-
-    resultDiv.scrollIntoView({ behavior: "smooth" });
-
-  } catch (err) {
-    resultDiv.innerHTML = "<p style='color:red'>❌ Error aaya, thodi der baad try karein.</p>";
-    console.error(err);
-  }
-}
-
-function clearMsg() {
-  document.getElementById("msg").value = "";
-  document.getElementById("result").innerHTML =
-    "<p class='muted'>Result yahan dikhai dega…</p>";
-}
+// auto load on start
+showDueAlerts();
