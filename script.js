@@ -9,7 +9,7 @@ async function submitAlert() {
   const reminder = document.getElementById("alert_reminder").value;
 
   if (!title || !due) {
-    alert("⚠️ Title aur Due Date zaruri hai!");
+    alert("Title and Due Date are required!");
     return;
   }
 
@@ -28,11 +28,11 @@ async function submitAlert() {
     });
 
     const data = await res.json();
-    alert(data.reply || "✅ Reminder save ho gaya!");
+    alert(data.reply || "Reminder saved successfully!");
     showDueAlerts();
 
   } catch (err) {
-    alert("❌ Server error. Baad me try karein.");
+    alert("Server error. Please try again later.");
     console.error(err);
   }
 }
@@ -40,14 +40,14 @@ async function submitAlert() {
 // ================== SHOW ALERTS ==================
 async function showDueAlerts() {
   const container = document.getElementById("due_alerts");
-  container.innerHTML = "<p class='muted'>⏳ Load ho raha hai…</p>";
+  container.innerHTML = "<p class='muted'>Loading…</p>";
 
   try {
     const res = await fetch(`${API_URL}/due_alerts`);
     const alerts = await res.json();
 
     if (!alerts.length) {
-      container.innerHTML = "<p class='muted'>Koi reminder nahi hai.</p>";
+      container.innerHTML = "<p class='muted'>No reminders found.</p>";
       return;
     }
 
@@ -57,22 +57,55 @@ async function showDueAlerts() {
       const div = document.createElement("div");
       div.className = "alert-card";
 
+      const alertId = a.alert.id || a.id || "";
+
       div.innerHTML = `
         <h3>${a.alert.title}</h3>
         <p><b>Type:</b> ${a.alert.type}</p>
         <p><b>Country:</b> ${a.alert.country}</p>
         <p><b>Due Date:</b> ${a.alert.due_date}</p>
         <p><b>Reminder:</b> ${a.alert.reminder_days} day(s) before</p>
+
+        <div class="card-actions">
+          <button class="done-btn" onclick="markComplete('${alertId}')">✓ Done</button>
+          <button class="delete-btn" onclick="deleteAlert('${alertId}')">🗑 Delete</button>
+        </div>
       `;
 
       container.appendChild(div);
     });
 
   } catch (err) {
-    container.innerHTML = "<p style='color:red'>❌ Fetch error</p>";
+    container.innerHTML = "<p style='color:red'>Fetch error</p>";
     console.error(err);
   }
 }
 
-// auto load on start
+// ================== DELETE ==================
+async function deleteAlert(id) {
+  if (!id) return alert("Missing alert id");
+
+  if (!confirm("Delete this reminder?")) return;
+
+  try {
+    await fetch(`${API_URL}/delete_alert/${id}`, { method: "DELETE" });
+    showDueAlerts();
+  } catch (err) {
+    alert("Delete failed");
+  }
+}
+
+// ================== COMPLETE ==================
+async function markComplete(id) {
+  if (!id) return alert("Missing alert id");
+
+  try {
+    await fetch(`${API_URL}/complete_alert/${id}`, { method: "POST" });
+    showDueAlerts();
+  } catch (err) {
+    alert("Update failed");
+  }
+}
+
+// auto load
 showDueAlerts();
