@@ -1,4 +1,4 @@
-  * {
+* {
   box-sizing: border-box;
 }
 
@@ -55,12 +55,12 @@ input, select {
 
 /* ===== BUTTON ===== */
 button {
-  padding: 11px 18px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: none;
   cursor: pointer;
   margin-top: 10px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .primary {
@@ -83,10 +83,27 @@ button {
 
 .alert-card {
   background: white;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 14px;
+  margin-bottom: 12px;
   border-radius: 10px;
   border-left: 4px solid #2563eb;
+}
+
+/* NEW */
+.card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.done-btn {
+  background: #16a34a;
+  color: white;
+}
+
+.delete-btn {
+  background: #dc2626;
+  color: white;
 }
 
 .muted {
@@ -103,6 +120,10 @@ button {
 
 /* ===== MOBILE ===== */
 @media (max-width: 600px) {
+  .card-actions {
+    flex-direction: column;
+  }
+
   button {
     width: 100%;
   }
