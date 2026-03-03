@@ -30,10 +30,8 @@ async function submitAlert() {
     const data = await res.json();
     alert(data.reply || "Reminder saved successfully!");
     showDueAlerts();
-
   } catch (err) {
     alert("Server error. Please try again later.");
-    console.error(err);
   }
 }
 
@@ -54,21 +52,21 @@ async function showDueAlerts() {
     container.innerHTML = "";
 
     alerts.forEach(a => {
+      const alert = a.alert;
       const div = document.createElement("div");
       div.className = "alert-card";
 
-      const alertId = a.alert.id || a.id || "";
-
       div.innerHTML = `
-        <h3>${a.alert.title}</h3>
-        <p><b>Type:</b> ${a.alert.type}</p>
-        <p><b>Country:</b> ${a.alert.country}</p>
-        <p><b>Due Date:</b> ${a.alert.due_date}</p>
-        <p><b>Reminder:</b> ${a.alert.reminder_days} day(s) before</p>
+        <h3>${alert.title}</h3>
+        <p><b>Type:</b> ${alert.type}</p>
+        <p><b>Country:</b> ${alert.country}</p>
+        <p><b>Due Date:</b> ${alert.due_date}</p>
+        <p><b>Reminder:</b> ${alert.reminder_days} day(s) before</p>
 
         <div class="card-actions">
-          <button class="done-btn" onclick="markComplete('${alertId}')">✓ Done</button>
-          <button class="delete-btn" onclick="deleteAlert('${alertId}')">🗑 Delete</button>
+          <button class="edit-btn" onclick="openEdit('${alert.id}','${alert.title}','${alert.due_date}','${alert.reminder_days}','${alert.country}','${alert.type}')">✏ Edit</button>
+          <button class="done-btn" onclick="markComplete('${alert.id}')">✓ Done</button>
+          <button class="delete-btn" onclick="deleteAlert('${alert.id}')">🗑 Delete</button>
         </div>
       `;
 
@@ -77,34 +75,58 @@ async function showDueAlerts() {
 
   } catch (err) {
     container.innerHTML = "<p style='color:red'>Fetch error</p>";
-    console.error(err);
+  }
+}
+
+// ================== OPEN EDIT ==================
+function openEdit(id, title, due, reminder, country, type) {
+
+  const newTitle = prompt("Edit Title:", title);
+  if (!newTitle) return;
+
+  const newDate = prompt("Edit Due Date (YYYY-MM-DD):", due);
+  if (!newDate) return;
+
+  const newReminder = prompt("Edit Reminder Days:", reminder);
+  if (!newReminder) return;
+
+  updateAlert(id, newTitle, newDate, newReminder, country, type);
+}
+
+// ================== UPDATE ALERT ==================
+async function updateAlert(id, title, due, reminder, country, type) {
+  try {
+    await fetch(`${API_URL}/edit_alert/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: title,
+        due_date: due,
+        reminder_days: reminder,
+        country: country,
+        type: type
+      })
+    });
+
+    alert("Updated successfully!");
+    showDueAlerts();
+  } catch (err) {
+    alert("Update failed");
   }
 }
 
 // ================== DELETE ==================
 async function deleteAlert(id) {
-  if (!id) return alert("Missing alert id");
-
   if (!confirm("Delete this reminder?")) return;
 
-  try {
-    await fetch(`${API_URL}/delete_alert/${id}`, { method: "DELETE" });
-    showDueAlerts();
-  } catch (err) {
-    alert("Delete failed");
-  }
+  await fetch(`${API_URL}/delete_alert/${id}`, { method: "DELETE" });
+  showDueAlerts();
 }
 
 // ================== COMPLETE ==================
 async function markComplete(id) {
-  if (!id) return alert("Missing alert id");
-
-  try {
-    await fetch(`${API_URL}/complete_alert/${id}`, { method: "POST" });
-    showDueAlerts();
-  } catch (err) {
-    alert("Update failed");
-  }
+  await fetch(`${API_URL}/complete_alert/${id}`, { method: "POST" });
+  showDueAlerts();
 }
 
 // auto load
