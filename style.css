@@ -1,33 +1,73 @@
-* { box-sizing: border-box; }
-body { margin:0; font-family: system-ui, sans-serif; background:#f1f5f9; color:#1e293b; }
+*{box-sizing:border-box}
 
-/* TOP BAR */
-.top-bar { background: linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:22px; text-align:center; }
-.top-bar h1 { margin:0; font-size:24px; }
+body{
+margin:0;
+font-family:system-ui;
+background:#f1f5f9;
+color:#1e293b
+}
 
-/* MAIN */
-.app { max-width:1000px; margin:auto; padding:20px; }
-.alert-section, .due-section { background:white; padding:20px; margin-bottom:25px; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+.top-bar{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+padding:25px;
+text-align:center
+}
 
-/* FORM */
-label { display:block; margin-bottom:12px; font-size:14px; }
-input, select { width:100%; padding:11px; margin-top:4px; border-radius:8px; border:1px solid #cbd5e1; }
+.app{
+max-width:900px;
+margin:auto;
+padding:20px
+}
 
-/* BUTTON */
-button { padding:10px 16px; border-radius:8px; border:none; cursor:pointer; margin-top:10px; font-size:14px; }
-.primary { background:#2563eb; color:white; }
-.secondary { background:#06b6d4; color:white; }
+.command-box,.result-box{
+background:white;
+padding:20px;
+border-radius:14px;
+box-shadow:0 6px 18px rgba(0,0,0,0.08);
+margin-bottom:25px
+}
 
-/* ALERT CARD */
-#due_alerts { background:#f8fafc; padding:14px; border-radius:10px; min-height:80px; }
-.alert-card { background:white; padding:14px; margin-bottom:12px; border-radius:10px; border-left:4px solid #2563eb; }
-.card-actions { display:flex; gap:8px; margin-top:10px; }
-.done-btn { background:#16a34a; color:white; }
-.delete-btn { background:#dc2626; color:white; }
-.muted { color:#94a3b8; }
+textarea{
+width:100%;
+height:120px;
+padding:12px;
+border-radius:8px;
+border:1px solid #cbd5e1;
+font-size:14px
+}
 
-/* FOOTER */
-.footer { text-align:center; padding:20px; font-size:13px; color:#64748b; }
+button{
+padding:10px 16px;
+border-radius:8px;
+border:none;
+cursor:pointer;
+margin-top:10px;
+font-size:14px
+}
 
-/* MOBILE */
-@media(max-width:600px){ .card-actions{ flex-direction:column; } button{ width:100%; } }
+.primary{
+background:#2563eb;
+color:white
+}
+
+.card{
+background:#f8fafc;
+padding:15px;
+border-radius:10px
+}
+
+a{
+color:#2563eb
+}
+
+.footer{
+text-align:center;
+padding:20px;
+font-size:13px;
+color:#64748b
+}
+
+.muted{
+color:#94a3b8
+}
