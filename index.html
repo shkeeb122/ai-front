@@ -1,73 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Alert System</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Marketing Automation</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <header class="top-bar">
-    <h1>Smart Alert & Reminder</h1>
-    <p>Set smart reminders for your important tasks.</p>
-  </header>
+<header class="top-bar">
+<h1>AI Marketing Automation</h1>
+<p>Command based affiliate marketing system</p>
+</header>
 
-  <main class="app">
+<main class="app">
 
-    <!-- ===== Add Alert ===== -->
-    <section class="alert-section">
-      <h2>➕ Add New Reminder</h2>
+<section class="command-box">
 
-      <label>Alert Type:
-        <select id="alert_type">
-          <option value="subscription">Subscription</option>
-          <option value="address_change">Address Change</option>
-          <option value="tax_bill">Tax / Bill</option>
-          <option value="insurance_loan">Insurance / Loan</option>
-          <option value="document_event">Document / Event</option>
-        </select>
-      </label>
+<h2>Run AI Command</h2>
 
-      <label>Title:
-        <input type="text" id="alert_title" placeholder="Example: Mobile Recharge">
-      </label>
+<textarea id="command_input"
+placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
 
-      <label>Country:
-        <select id="alert_country">
-          <option value="India">India</option>
-          <option value="USA">USA</option>
-        </select>
-      </label>
+<button class="primary" onclick="runCommand()">Run Command</button>
 
-      <label>Due Date:
-        <input type="date" id="alert_due">
-      </label>
+</section>
 
-      <label>Reminder Days Before:
-        <input type="number" id="alert_reminder" value="1">
-      </label>
+<section class="result-box">
 
-      <button class="primary" onclick="submitAlert()">Save Reminder</button>
-    </section>
+<h2>System Result</h2>
 
-    <!-- ===== Due Alerts ===== -->
-    <section class="due-section">
-      <h2>⏰ Upcoming Reminders</h2>
+<div id="result">
+<p class="muted">No command executed yet...</p>
+</div>
 
-      <div id="due_alerts">
-        <p class="muted">No reminders yet…</p>
-      </div>
+</section>
 
-      <button class="secondary" onclick="showDueAlerts()">Refresh</button>
-    </section>
+</main>
 
-  </main>
+<footer class="footer">
+AI Marketing System
+</footer>
 
-  <footer class="footer">
-    © 2026 Smart Reminder System
-  </footer>
+<script src="script.js"></script>
 
-  <script src="script.js"></script>
 </body>
 </html>
