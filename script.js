@@ -15,7 +15,7 @@ async function runCommand() {
 
     try {
         // Send command to backend API
-        const res = await fetch(`${API_URL}/command`,{
+        const res = await fetch(`${API_URL}/command`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({command})
@@ -23,6 +23,12 @@ async function runCommand() {
 
         // Parse backend response
         const r = await res.json();
+
+        // Check for backend error
+        if(r.status === "error"){
+            resultBox.innerHTML = `<p style="color:red">Error: ${r.message}</p>`;
+            return;
+        }
 
         // Display result in frontend
         resultBox.innerHTML = `
@@ -41,7 +47,7 @@ async function runCommand() {
         </div>`;
         
     } catch(e){
-        console.error(e);
+        console.error("Frontend error:", e);
         resultBox.innerHTML = "<p style='color:red'>Server error. Check console for details.</p>";
     }
 }
