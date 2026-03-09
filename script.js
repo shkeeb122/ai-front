@@ -14,21 +14,23 @@ async function runCommand() {
     resultBox.innerHTML = "Running AI system...";
 
     try {
-        // Send command to backend API
         const res = await fetch(`${API_URL}/command`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({command})
         });
 
-        // Parse backend response
         const r = await res.json();
 
-        // Check for backend error
+        // Backend returned error
         if(r.status === "error"){
             resultBox.innerHTML = `<p style="color:red">Error: ${r.message}</p>`;
+            console.error(r.trace || r.message);
             return;
         }
+
+        // Products field may not exist in backend
+        const productsList = r.products ? r.products.map(p => p.name).join(", ") : "N/A";
 
         // Display result in frontend
         resultBox.innerHTML = `
@@ -40,7 +42,7 @@ async function runCommand() {
             <p>${r.keywords.join(", ")}</p>
 
             <h3>Products</h3>
-            <p>${r.products.map(p => p.name).join(", ")}</p>
+            <p>${productsList}</p>
 
             <h3>Blog URL</h3>
             <a href="${r.blog_url}" target="_blank">${r.blog_url}</a>
