@@ -1,6 +1,41 @@
 const API_URL = "https://umar-k20u.onrender.com";
 
 // ========================
+// Global Saved History
+// ========================
+let conversationHistory = [];
+
+// ========================
+// Load campaigns on page load
+// ========================
+window.onload = async () => {
+    await loadCampaigns();
+};
+
+// ========================
+// Load Campaigns
+// ========================
+async function loadCampaigns(){
+    const list = document.getElementById("campaign_list");
+    list.innerHTML = "Loading campaigns...";
+    try{
+        const res = await fetch(`${API_URL}/campaigns`);
+        const data = await res.json();
+        if(data.status === "success"){
+            if(data.campaigns.length === 0){
+                list.innerHTML = "<p class='muted'>No campaigns yet...</p>";
+            } else {
+                list.innerHTML = "";
+                data.campaigns.forEach(c => addCampaignToSidebar(c.id, c.niche));
+            }
+        }
+    } catch(e){
+        console.error("Load campaigns error:", e);
+        list.innerHTML = "<p class='status-red'>Failed to load campaigns.</p>";
+    }
+}
+
+// ========================
 // Run AI Command
 // ========================
 async function runCommand() {
@@ -16,7 +51,7 @@ async function runCommand() {
         const res = await fetch(`${API_URL}/command`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({command})
+            body: JSON.stringify({command, history: conversationHistory})
         });
 
         const r = await res.json();
@@ -42,7 +77,11 @@ async function runCommand() {
             <h3>Source Info</h3><p>${r.source}</p>
         </div>`;
 
-        // Update sidebar with this campaign
+        // Update global conversation history
+        conversationHistory.push({role:"user", content:command});
+        conversationHistory.push({role:"assistant", content:`Generated content for ${r.niche}`});
+
+        // Update sidebar
         addCampaignToSidebar(r.campaign_id, r.niche);
 
     } catch(e){
@@ -53,14 +92,46 @@ async function runCommand() {
 }
 
 // ========================
-// Sidebar Campaign
+// Add Campaign to Sidebar
 // ========================
 function addCampaignToSidebar(campaignId, niche){
     const list = document.getElementById("campaign_list");
+
+    // Prevent duplicate
+    if([...list.children].some(c => c.dataset.id === campaignId)) return;
+
+    const div = document.createElement("div");
+    div.className = "sidebar-item";
+    div.dataset.id = campaignId;
+
     const p = document.createElement("p");
     p.innerText = niche;
     p.onclick = () => viewHistory(campaignId);
-    list.prepend(p);
+
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "🗑️";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = async (e) => {
+        e.stopPropagation();
+        await deleteCampaign(campaignId);
+        div.remove();
+        document.getElementById("history_result").innerHTML = "<p class='muted'>Select a campaign to view details...</p>";
+    };
+
+    div.appendChild(p);
+    div.appendChild(delBtn);
+    list.prepend(div);
+}
+
+// ========================
+// Delete Campaign
+// ========================
+async function deleteCampaign(campaignId){
+    try{
+        await fetch(`${API_URL}/campaign/delete/${campaignId}`, {method:"DELETE"});
+    } catch(e){
+        console.error("Delete error:", e);
+    }
 }
 
 // ========================
