@@ -7,60 +7,58 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header class="top-bar">
     <h1>AI Marketing Automation</h1>
     <p>Command-based AI marketing system</p>
 </header>
 
 <main class="app">
-    <div class="container">
+<div class="container">
 
-        <!-- Sidebar Campaign History -->
-        <aside class="sidebar">
-            <h2>Campaigns</h2>
-            <div id="campaign_list">
-                <p class="muted">No campaigns yet...</p>
-            </div>
-        </aside>
+    <!-- Sidebar Campaign History -->
+    <aside class="sidebar">
+        <h2>Campaigns</h2>
+        <div id="campaign_list">
+            <p class="muted">No campaigns yet...</p>
+        </div>
+    </aside>
 
-        <!-- Main Panel -->
-        <section class="main-panel">
+    <!-- Main Panel -->
+    <section class="main-panel">
 
-            <!-- Command Box -->
-            <section class="command-box">
-                <h2>Run AI Command</h2>
-                <textarea id="command_input" placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
-                <button class="primary" onclick="runCommand()">Run Command</button>
-                <p id="status_indicator" class="muted">Status: Idle</p>
-            </section>
-
-            <!-- Result Box -->
-            <section class="result-box">
-                <h2>System Result</h2>
-                <div id="result">
-                    <p class="muted">No command executed yet...</p>
-                </div>
-            </section>
-
-            <!-- History Box -->
-            <section class="history-box">
-                <h2>Campaign History / Timeline</h2>
-                <div id="history_result">
-                    <p class="muted">Select a campaign to view details...</p>
-                </div>
-            </section>
-
+        <!-- Command Box -->
+        <section class="command-box">
+            <h2>Run AI Command</h2>
+            <textarea id="command_input" placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
+            <button class="primary" onclick="runCommand()">Run Command</button>
+            <p id="status_indicator" class="muted">Status: Idle</p>
         </section>
 
-    </div>
+        <!-- Result Box -->
+        <section class="result-box">
+            <h2>System Result</h2>
+            <div id="result">
+                <p class="muted">No command executed yet...</p>
+            </div>
+        </section>
+
+        <!-- History Box -->
+        <section class="history-box">
+            <h2>Campaign History / Timeline</h2>
+            <div id="history_result">
+                <p class="muted">Select a campaign to view details...</p>
+            </div>
+        </section>
+
+    </section>
+
+</div>
 </main>
 
 <footer class="footer">
     AI Marketing System
 </footer>
 
-<!-- Script -->
 <script src="script.js"></script>
 </body>
 </html>
