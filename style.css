@@ -1,5 +1,5 @@
-    /* ========================
-   Global Reset
+/* ========================
+Global Reset
 ======================== */
 * {
     box-sizing: border-box;
@@ -8,7 +8,7 @@
 }
 
 /* ========================
-   Body & Fonts
+Body & Fonts
 ======================== */
 body {
     font-family: system-ui, sans-serif;
@@ -17,7 +17,7 @@ body {
 }
 
 /* ========================
-   Top Bar / Header
+Top Bar / Header
 ======================== */
 .top-bar {
     background: linear-gradient(135deg, #0f172a, #1e293b);
@@ -27,7 +27,7 @@ body {
 }
 
 /* ========================
-   Container: Sidebar + Main Panel
+Container: Sidebar + Main Panel
 ======================== */
 .container {
     display: flex;
@@ -38,7 +38,7 @@ body {
 }
 
 /* ========================
-   Sidebar
+Sidebar
 ======================== */
 .sidebar {
     width: 260px;
@@ -47,12 +47,10 @@ body {
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     padding: 15px;
     height: 80vh;
-    overflow-y: auto; /* scrollable sidebar */
+    overflow-y: auto;
 }
 
-.sidebar h2 {
-    margin-bottom: 12px;
-}
+.sidebar h2 { margin-bottom: 12px; }
 
 .sidebar p {
     margin-bottom: 10px;
@@ -65,7 +63,7 @@ body {
     padding: 4px;
 }
 
-/* Sidebar item (niche + delete button) */
+/* Sidebar item */
 .sidebar-item {
     display: flex;
     justify-content: space-between;
@@ -83,12 +81,10 @@ body {
     font-size: 12px;
 }
 
-.delete-btn:hover {
-    opacity: 0.8;
-}
+.delete-btn:hover { opacity: 0.8; }
 
 /* ========================
-   Main Panel
+Main Panel
 ======================== */
 .main-panel {
     flex: 1;
@@ -98,7 +94,7 @@ body {
 }
 
 /* ========================
-   Command Box / Result Box / History Box
+Boxes
 ======================== */
 .command-box,
 .result-box,
@@ -110,7 +106,7 @@ body {
 }
 
 /* ========================
-   Textarea
+Textarea
 ======================== */
 textarea {
     width: 100%;
@@ -123,7 +119,7 @@ textarea {
 }
 
 /* ========================
-   Buttons
+Buttons
 ======================== */
 button {
     padding: 10px 16px;
@@ -135,17 +131,11 @@ button {
     transition: background 0.3s;
 }
 
-button:hover {
-    opacity: 0.9;
-}
-
-.primary {
-    background: #2563eb;
-    color: white;
-}
+button:hover { opacity: 0.9; }
+.primary { background: #2563eb; color: white; }
 
 /* ========================
-   Cards for Results & History
+Cards for Results & History
 ======================== */
 .card {
     background: #f8fafc;
@@ -155,22 +145,16 @@ button:hover {
     word-break: break-word;
 }
 
-.card h3 {
-    margin-bottom: 6px;
-}
-
+.card h3 { margin-bottom: 6px; }
 .card a {
     color: #2563eb;
     word-break: break-all;
     text-decoration: underline;
 }
-
-.card p {
-    margin-bottom: 8px;
-}
+.card p { margin-bottom: 8px; }
 
 /* ========================
-   Footer
+Footer
 ======================== */
 .footer {
     text-align: center;
@@ -180,34 +164,25 @@ button:hover {
 }
 
 /* ========================
-   Muted Text
+Muted Text
 ======================== */
-.muted {
-    color: #94a3b8;
-}
+.muted { color: #94a3b8; }
 
 /* ========================
-   History Box Specific
+History Box Specific
 ======================== */
-.history-box p {
-    font-size: 14px;
-}
-
-.history-box hr {
-    border: none;
-    border-top: 1px solid #cbd5e1;
-    margin: 8px 0;
-}
+.history-box p { font-size: 14px; }
+.history-box hr { border: none; border-top: 1px solid #cbd5e1; margin: 8px 0; }
 
 /* ========================
-   Real-time / Fallback Indicators
+Real-time / Fallback Indicators
 ======================== */
 .status-green { color: green; font-weight: bold; }
 .status-orange { color: orange; font-weight: bold; }
 .status-red { color: red; font-weight: bold; }
 
 /* ========================
-   Responsive
+Responsive
 ======================== */
 @media(max-width: 900px){
     .container { flex-direction: column; }
@@ -215,22 +190,9 @@ button:hover {
 }
 
 /* ========================
-   Scrollbar Styling (optional)
+Scrollbar Styling
 ======================== */
-.sidebar::-webkit-scrollbar {
-    width: 8px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 6px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
