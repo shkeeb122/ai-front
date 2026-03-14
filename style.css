@@ -1,4 +1,4 @@
-/* ========================
+    /* ========================
    Global Reset
 ======================== */
 * {
@@ -46,7 +46,8 @@ body {
     border-radius: 12px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     padding: 15px;
-    height: fit-content;
+    height: 80vh;
+    overflow-y: auto; /* scrollable sidebar */
 }
 
 .sidebar h2 {
@@ -64,6 +65,28 @@ body {
     padding: 4px;
 }
 
+/* Sidebar item (niche + delete button) */
+.sidebar-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-btn:hover {
+    opacity: 0.8;
+}
+
 /* ========================
    Main Panel
 ======================== */
@@ -75,7 +98,7 @@ body {
 }
 
 /* ========================
-   Command Box & Result Box & History Box
+   Command Box / Result Box / History Box
 ======================== */
 .command-box,
 .result-box,
@@ -129,6 +152,7 @@ button:hover {
     padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
+    word-break: break-word;
 }
 
 .card h3 {
@@ -138,6 +162,7 @@ button:hover {
 .card a {
     color: #2563eb;
     word-break: break-all;
+    text-decoration: underline;
 }
 
 .card p {
@@ -186,5 +211,26 @@ button:hover {
 ======================== */
 @media(max-width: 900px){
     .container { flex-direction: column; }
-    .sidebar { width: 100%; }
+    .sidebar { width: 100%; height: auto; max-height: 300px; }
+}
+
+/* ========================
+   Scrollbar Styling (optional)
+======================== */
+.sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
