@@ -149,4 +149,4 @@ async function viewHistory(campaignId){
         console.error("History error:", e);
         historyResult.innerHTML = "<p class='status-red'>Failed to load history.</p>";
     }
-}
+                }
