@@ -1,61 +1,198 @@
-/* Global Reset */
-*{ box-sizing:border-box; margin:0; padding:0; }
-body{ font-family: system-ui,sans-serif; background:#f1f5f9; color:#1e293b; }
-
-/* Top Bar */
-.top-bar{ background: linear-gradient(135deg,#0f172a,#1e293b); color:white; padding:20px; text-align:center; }
-
-/* Container */
-.container{ display:flex; max-width:1200px; margin:auto; padding:20px; gap:20px; }
-
-/* Sidebar */
-.sidebar{ width:260px; background:white; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.08); padding:15px; height:80vh; overflow-y:auto; }
-.sidebar h2{ margin-bottom:12px; }
-.sidebar input{ width:100%; padding:6px; margin-bottom:10px; border-radius:6px; border:1px solid #cbd5e1;}
-.sidebar p{ margin-bottom:10px; cursor:pointer; }
-.sidebar p:hover{ background:#f0f4f8; border-radius:6px; padding:4px; }
-.sidebar-item{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
-.delete-btn{ background:red; color:white; border:none; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:12px; }
-.delete-btn:hover{opacity:0.8;}
-
-/* Main Panel */
-.main-panel{ flex:1; display:flex; flex-direction:column; gap:20px; }
-
-/* Boxes */
-.command-box, .result-box, .history-box{ background:white; padding:20px; border-radius:14px; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
-textarea{ width:100%; height:100px; padding:10px; border-radius:8px; border:1px solid #cbd5e1; font-size:14px; resize:vertical; }
-button{ padding:10px 16px; border-radius:8px; border:none; cursor:pointer; margin-top:10px; font-size:14px; transition:background 0.3s; }
-button:hover{ opacity:0.9; } .primary{ background:#2563eb; color:white; }
-
-/* Cards */
-.card{ background:#f8fafc; padding:15px; border-radius:10px; margin-bottom:15px; word-break:break-word; }
-.card h3{ margin-bottom:6px; } .card a{ color:#2563eb; word-break:break-all; text-decoration:underline; }
-.card p{ margin-bottom:8px; }
-
-/* Footer */
-.footer{ text-align:center; padding:20px; font-size:13px; color:#64748b; }
-
-/* Muted Text */
-.muted{ color:#94a3b8; }
-
-/* History Box */
-.history-box p{ font-size:14px; }
-.history-box hr{ border:none; border-top:1px solid #cbd5e1; margin:8px 0; }
-
-/* Status Colors */
-.status-green{ color:green; font-weight:bold; }
-.status-orange{ color:orange; font-weight:bold; }
-.status-red{ color:red; font-weight:bold; }
-.status-blue{ color:#2563eb; font-weight:bold; } /* user */
-
-/* Responsive */
-@media(max-width:900px){
-    .container{ flex-direction:column; }
-    .sidebar{ width:100%; height:auto; max-height:300px; }
+/* ========================
+Global Reset
+======================== */
+{
+box-sizing: border-box;
+margin: 0;
+padding: 0;
 }
 
-/* Scrollbar */
-.sidebar::-webkit-scrollbar{ width:8px; }
-.sidebar::-webkit-scrollbar-track{ background:#f1f5f9; border-radius:6px; }
-.sidebar::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:6px; }
-.sidebar::-webkit-scrollbar-thumb:hover{ background:#94a3b8; }
+/* ========================
+Body & Fonts
+======================== */
+body {
+font-family: system-ui, sans-serif;
+background: #f1f5f9;
+color: #1e293b;
+}
+
+/* ========================
+Top Bar / Header
+======================== */
+.top-bar {
+background: linear-gradient(135deg, #0f172a, #1e293b);
+color: white;
+padding: 20px;
+text-align: center;
+}
+
+/* ========================
+Container: Sidebar + Main Panel
+======================== */
+.container {
+display: flex;
+max-width: 1200px;
+margin: auto;
+padding: 20px;
+gap: 20px;
+}
+
+/* ========================
+Sidebar
+======================== */
+.sidebar {
+width: 260px;
+background: white;
+border-radius: 12px;
+box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+padding: 15px;
+height: 80vh;
+overflow-y: auto;
+}
+
+.sidebar h2 { margin-bottom: 12px; }
+
+.sidebar p {
+margin-bottom: 10px;
+cursor: pointer;
+}
+
+.sidebar p:hover {
+background: #f0f4f8;
+border-radius: 6px;
+padding: 4px;
+}
+
+/* Sidebar item */
+.sidebar-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 10px;
+}
+
+.delete-btn {
+background: red;
+color: white;
+border: none;
+padding: 2px 6px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 12px;
+}
+
+.delete-btn:hover { opacity: 0.8; }
+
+/* ========================
+Main Panel
+======================== */
+.main-panel {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 20px;
+}
+
+/* ========================
+Boxes
+======================== */
+.command-box,
+.result-box,
+.history-box {
+background: white;
+padding: 20px;
+border-radius: 14px;
+box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* ========================
+Textarea
+======================== */
+textarea {
+width: 100%;
+height: 100px;
+padding: 10px;
+border-radius: 8px;
+border: 1px solid #cbd5e1;
+font-size: 14px;
+resize: vertical;
+}
+
+/* ========================
+Buttons
+======================== */
+button {
+padding: 10px 16px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+margin-top: 10px;
+font-size: 14px;
+transition: background 0.3s;
+}
+
+button:hover { opacity: 0.9; }
+.primary { background: #2563eb; color: white; }
+
+/* ========================
+Cards for Results & History
+======================== */
+.card {
+background: #f8fafc;
+padding: 15px;
+border-radius: 10px;
+margin-bottom: 15px;
+word-break: break-word;
+}
+
+.card h3 { margin-bottom: 6px; }
+.card a {
+color: #2563eb;
+word-break: break-all;
+text-decoration: underline;
+}
+.card p { margin-bottom: 8px; }
+
+/* ========================
+Footer
+======================== */
+.footer {
+text-align: center;
+padding: 20px;
+font-size: 13px;
+color: #64748b;
+}
+
+/* ========================
+Muted Text
+======================== */
+.muted { color: #94a3b8; }
+
+/* ========================
+History Box Specific
+======================== */
+.history-box p { font-size: 14px; }
+.history-box hr { border: none; border-top: 1px solid #cbd5e1; margin: 8px 0; }
+
+/* ========================
+Real-time / Fallback Indicators
+======================== */
+.status-green { color: green; font-weight: bold; }
+.status-orange { color: orange; font-weight: bold; }
+.status-red { color: red; font-weight: bold; }
+
+/* ========================
+Responsive
+======================== */
+@media(max-width: 900px){
+.container { flex-direction: column; }
+.sidebar { width: 100%; height: auto; max-height: 300px; }
+}
+
+/* ========================
+Scrollbar Styling
+======================== */
+.sidebar::-webkit-scrollbar { width: 8px; }
+.sidebar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
