@@ -17,12 +17,14 @@ function restoreHistory(){
         historyBox.innerHTML = "<p class='muted'>No saved history</p>";
         return;
     }
-    let html = "<div class='card'>";
+    let html = "<div class='card chat-history'>";
     conversationHistory.forEach(h=>{
-        html += `<p><strong>${h.role}</strong>: ${h.content}</p>`;
+        let roleClass = h.role === "user" ? "status-orange" : "status-green";
+        html += `<p><strong>${h.role.toUpperCase()}:</strong> <span class="${roleClass}">${h.content.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>')}</span></p>`;
     });
     html += "</div>";
     historyBox.innerHTML = html;
+    historyBox.scrollTop = historyBox.scrollHeight;
 }
 
 async function loadCampaigns(){
@@ -79,7 +81,7 @@ async function runCommand() {
             <h3>Source Info</h3><p>${r.source}</p>
         </div>`;
         conversationHistory.push({role:"user", content:command});
-        conversationHistory.push({role:"assistant", content:`Generated content for ${r.niche}`});
+        conversationHistory.push({role:"assistant", content:`Generated content for ${r.niche} | Blog: ${r.blog_url}`});
         saveHistory();
         addCampaignToSidebar(r.campaign_id, r.niche);
         restoreHistory();
@@ -130,19 +132,19 @@ async function viewHistory(campaignId){
             historyResult.innerHTML = `<p class="status-red">${data.message}</p>`;
             return;
         }
-        let html = "<div class='card'>";
+        let html = "<div class='card chat-history'>";
         data.history.forEach(step => {
             let colorClass = step.source.includes("FALLBACK")
                 ? "status-orange"
                 : (step.status.toLowerCase() === "success"
                     ? "status-green"
                     : "status-red");
-            html += `<p><strong>${step.step_name}:</strong> <span class="${colorClass}">${step.status}</span> - <em>${step.source}</em>`;
-            if(step.note) html += `<br>Note: ${step.note}`;
-            html += `<br><small>${new Date(step.timestamp).toLocaleString()}</small></p><hr>`;
+            html += `<p><strong>${step.step_name}:</strong> <span class="${colorClass}">${step.status} | ${step.note ? `<a href="${step.note}" target="_blank">${step.note}</a>` : ""}</span></p>`;
+            html += `<small>${new Date(step.timestamp).toLocaleString()}</small><hr>`;
         });
         html += "</div>";
         historyResult.innerHTML = html;
+        historyResult.scrollTop = historyResult.scrollHeight;
     }catch(e){
         console.error("History error:", e);
         historyResult.innerHTML = "<p class='status-red'>Failed to load history.</p>";
