@@ -1,98 +1,76 @@
-/* ========================
-Global Reset
-======================== */
+/* ================= BASE ================= */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ========================
-Body & Fonts
-======================== */
 body {
-  font-family: system-ui, sans-serif;
-  background: #f1f5f9;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #1e3a8a, #9333ea);
   color: #1e293b;
 }
 
-/* ========================
-Top Bar / Header
-======================== */
+/* ================= HEADER ================= */
 .top-bar {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-  padding: 20px;
   text-align: center;
+  padding: 20px;
+  color: white;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
 }
 
-.top-bar h1 {
-  margin-bottom: 4px;
+.logo {
+  font-size: 26px;
+  font-weight: 600;
 }
 
-/* ========================
-Container: Sidebar + Main Panel
-======================== */
+.subtitle {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* ================= LAYOUT ================= */
 .container {
   display: flex;
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
   gap: 20px;
+  padding: 20px;
 }
 
-/* ========================
-Sidebar
-======================== */
+/* ================= SIDEBAR ================= */
 .sidebar {
   width: 260px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.9);
+  border-radius: 15px;
   padding: 15px;
   height: 80vh;
   overflow-y: auto;
 }
 
 .sidebar h2 {
-  margin-bottom: 12px;
-  font-size: 18px;
+  margin-bottom: 10px;
 }
 
-.sidebar p {
+.campaign-item {
+  padding: 10px;
   margin-bottom: 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
   cursor: pointer;
+  transition: 0.3s;
 }
 
-.sidebar p:hover {
-  background: #f0f4f8;
-  border-radius: 6px;
-  padding: 4px;
-}
-
-/* Sidebar item */
-.sidebar-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.delete-btn {
-  background: red;
+.campaign-item:hover {
+  background: #6366f1;
   color: white;
-  border: none;
-  padding: 2px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
 }
 
-.delete-btn:hover { opacity: 0.8; }
+.campaign-item.active {
+  background: #2563eb;
+  color: white;
+}
 
-/* ========================
-Main Panel
-======================== */
+/* ================= MAIN ================= */
 .main-panel {
   flex: 1;
   display: flex;
@@ -100,109 +78,120 @@ Main Panel
   gap: 20px;
 }
 
-/* ========================
-Boxes
-======================== */
+/* ================= BOX ================= */
 .command-box,
 .result-box,
 .history-box {
-  background: white;
+  background: rgba(255,255,255,0.95);
+  border-radius: 15px;
   padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  overflow-y: auto;
-  max-height: 400px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
 }
 
-/* ========================
-Textarea
-======================== */
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 20px rgba(59,130,246,0.6);
+}
+
+/* ================= TEXTAREA ================= */
 textarea {
   width: 100%;
-  height: 100px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  font-size: 14px;
-  resize: vertical;
-}
-
-/* ========================
-Buttons
-======================== */
-button {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-button:hover { opacity: 0.9; }
-.primary { background: #2563eb; color: white; }
-
-/* ========================
-Cards for Results & History
-======================== */
-.card {
-  background: #f8fafc;
-  padding: 15px;
+  min-height: 90px;
   border-radius: 10px;
-  margin-bottom: 15px;
-  word-break: break-word;
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  margin-top: 10px;
 }
 
-.card h3 { margin-bottom: 6px; }
-.card a {
-  color: #2563eb;
-  word-break: break-all;
-  text-decoration: underline;
+/* ================= BUTTON ================= */
+.primary {
+  margin-top: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #9333ea);
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
 }
-.card p { margin-bottom: 8px; }
 
-/* ========================
-Footer
-======================== */
+.primary:hover {
+  transform: scale(1.05);
+}
+
+/* ================= CHAT ================= */
+.chat-box {
+  height: 300px;
+  overflow-y: auto;
+  padding: 10px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+/* MESSAGES */
+.msg {
+  max-width: 70%;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 15px;
+  animation: fadeIn 0.3s ease;
+}
+
+.msg.user {
+  background: #3b82f6;
+  color: white;
+  margin-left: auto;
+}
+
+.msg.bot {
+  background: #e5e7eb;
+  color: black;
+  margin-right: auto;
+}
+
+/* ================= CHAT INPUT ================= */
+.chat-input {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.chat-input textarea {
+  flex: 1;
+  min-height: 50px;
+}
+
+/* ================= FOOTER ================= */
 .footer {
   text-align: center;
-  padding: 20px;
-  font-size: 13px;
-  color: #64748b;
+  padding: 15px;
+  color: white;
 }
 
-/* ========================
-Muted Text
-======================== */
-.muted { color: #94a3b8; }
+/* ================= ANIMATION ================= */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
 
-/* ========================
-History Box Specific
-======================== */
-.history-box p { font-size: 14px; }
-.history-box hr { border: none; border-top: 1px solid #cbd5e1; margin: 8px 0; }
-.chat-history { max-height: 400px; overflow-y: auto; }
+/* ================= SCROLL ================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
 
-/* ========================
-Real-time / Fallback Indicators
-======================== */
-.status-green { color: green; font-weight: bold; }
-.status-orange { color: orange; font-weight: bold; }
-.status-red { color: red; font-weight: bold; }
+::-webkit-scrollbar-thumb {
+  background: #6366f1;
+  border-radius: 10px;
+}
 
-/* ========================
-Responsive
-======================== */
+/* ================= RESPONSIVE ================= */
 @media(max-width: 900px){
-  .container { flex-direction: column; }
-  .sidebar { width: 100%; height: auto; max-height: 300px; }
-}
+  .container {
+    flex-direction: column;
+  }
 
-/* ========================
-Scrollbar Styling
-======================== */
-.sidebar::-webkit-scrollbar { width: 8px; }
-.sidebar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
-.sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
-.sidebar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  .sidebar {
+    width: 100%;
+    height: auto;
+  }
+}
