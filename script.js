@@ -1,42 +1,76 @@
-const API_URL = "https://umar-k20u.onrender.com";
+  const API_URL = "https://umar-k20u.onrender.com";
 
 let currentCampaign = null;
 
-window.onload = async () => {
+// ================= INIT =================
+window.onload = () => {
     loadCampaigns();
 };
 
+// ================= LOAD CAMPAIGNS =================
 async function loadCampaigns(){
-    const res = await fetch(`${API_URL}/campaigns`);
-    const data = await res.json();
-    const list = document.getElementById("campaign_list");
-    list.innerHTML = "";
+    try{
+        const res = await fetch(`${API_URL}/campaigns`);
+        const data = await res.json();
 
-    data.campaigns.forEach(c=>{
-        const div = document.createElement("p");
-        div.innerText = c.niche;
-        div.onclick = ()=>openCampaign(c.id);
-        list.appendChild(div);
-    });
+        const list = document.getElementById("campaign_list");
+        list.innerHTML = "";
+
+        if(!data.campaigns || data.campaigns.length===0){
+            list.innerHTML = "<p class='muted'>No campaigns yet...</p>";
+            return;
+        }
+
+        data.campaigns.forEach(c=>{
+            const div = document.createElement("div");
+            div.className = "campaign-item";
+            div.innerText = c.niche;
+
+            div.onclick = ()=>{
+                document.querySelectorAll(".campaign-item")
+                .forEach(el=>el.classList.remove("active"));
+
+                div.classList.add("active");
+                openCampaign(c.id);
+            };
+
+            list.appendChild(div);
+        });
+
+    }catch(e){
+        console.error("Campaign load error", e);
+    }
 }
 
+// ================= RUN COMMAND =================
 async function runCommand(){
-    const cmd = document.getElementById("command_input").value;
+    const cmd = document.getElementById("command_input").value.trim();
+    if(!cmd) return;
 
-    const res = await fetch(`${API_URL}/command`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({command:cmd})
-    });
+    setStatus("Running...");
 
-    const data = await res.json();
+    try{
+        const res = await fetch(`${API_URL}/command`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({command:cmd})
+        });
 
-    currentCampaign = data.campaign_id;
+        const data = await res.json();
 
-    renderChat(data.conversation);
-    loadCampaigns();
+        currentCampaign = data.campaign_id;
+
+        renderChat(data.conversation);
+        loadCampaigns();
+
+        setStatus("Completed ✅");
+
+    }catch(e){
+        setStatus("Error ❌");
+    }
 }
 
+// ================= OPEN CAMPAIGN =================
 async function openCampaign(id){
     currentCampaign = id;
 
@@ -46,30 +80,77 @@ async function openCampaign(id){
     renderChat(data.conversation);
 }
 
+// ================= SEND CHAT =================
 async function sendChat(){
-    const msg = document.getElementById("chat_input").value;
+    const input = document.getElementById("chat_input");
+    const msg = input.value.trim();
 
-    const res = await fetch(`${API_URL}/chat/${currentCampaign}`,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message:msg})
-    });
+    if(!msg || !currentCampaign) return;
 
-    const data = await res.json();
+    input.value = "";
 
-    renderChat(data.conversation);
-    document.getElementById("chat_input").value = "";
+    appendMessage("user", msg); // instant show
+
+    try{
+        const res = await fetch(`${API_URL}/chat/${currentCampaign}`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({message:msg})
+        });
+
+        const data = await res.json();
+
+        renderChat(data.conversation);
+
+    }catch(e){
+        appendMessage("bot", "Error getting response.");
+    }
 }
 
+// ================= RENDER CHAT =================
 function renderChat(conv){
     const box = document.getElementById("history_result");
 
-    let html = "";
+    if(!conv || conv.length===0){
+        box.innerHTML = "<p class='muted'>No chat yet...</p>";
+        return;
+    }
+
+    box.innerHTML = "";
+
     conv.forEach(m=>{
-        let cls = m.role==="user"?"user-msg":"bot-msg";
-        html += `<div class="${cls}">${m.content.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>')}</div>`;
+        appendMessage(m.role, m.content, false);
     });
 
-    box.innerHTML = html;
+    scrollBottom();
+}
+
+// ================= APPEND MESSAGE =================
+function appendMessage(role, text, scroll=true){
+    const box = document.getElementById("history_result");
+
+    const div = document.createElement("div");
+    div.className = role === "user" ? "msg user" : "msg bot";
+
+    // clickable links
+    text = text.replace(/(https?:\/\/[^\s]+)/g,
+        '<a href="$1" target="_blank">$1</a>'
+    );
+
+    div.innerHTML = text;
+
+    box.appendChild(div);
+
+    if(scroll) scrollBottom();
+}
+
+// ================= SCROLL =================
+function scrollBottom(){
+    const box = document.getElementById("history_result");
     box.scrollTop = box.scrollHeight;
 }
+
+// ================= STATUS =================
+function setStatus(text){
+    document.getElementById("status_indicator").innerText = "Status: " + text;
+}  
