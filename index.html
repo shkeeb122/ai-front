@@ -3,47 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Marketing Dashboard</title>
+  <title>AI Marketing Automation</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
+<!-- ================= HEADER ================= -->
 <header class="top-bar">
     <h1>AI Marketing Automation</h1>
     <p>Command-based AI marketing system</p>
 </header>
+
+<!-- ================= MAIN ================= -->
 <main class="app">
 <div class="container">
+
+  <!-- ========= SIDEBAR ========= -->
   <aside class="sidebar">
       <h2>Campaigns</h2>
       <div id="campaign_list">
           <p class="muted">No campaigns yet...</p>
       </div>
   </aside>
+
+  <!-- ========= MAIN PANEL ========= -->
   <section class="main-panel">
+
+    <!-- ===== COMMAND BOX ===== -->
     <section class="command-box">
         <h2>Run AI Command</h2>
-        <textarea id="command_input" placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
+        <textarea id="command_input"
+        placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
+
         <button class="primary" onclick="runCommand()">Run Command</button>
         <p id="status_indicator" class="muted">Status: Idle</p>
     </section>
+
+    <!-- ===== RESULT BOX ===== -->
     <section class="result-box">
         <h2>System Result</h2>
         <div id="result">
             <p class="muted">No command executed yet...</p>
         </div>
     </section>
+
+    <!-- ===== CHAT SYSTEM ===== -->
     <section class="history-box">
-        <h2>Campaign History / Timeline</h2>
-        <div id="history_result">
-            <p class="muted">Select a campaign to view details...</p>
+
+        <h2>Campaign Chat</h2>
+
+        <!-- CHAT DISPLAY -->
+        <div id="history_result" class="chat-box">
+            <p class="muted">Select or create a campaign to start chat...</p>
         </div>
+
+        <!-- CHAT INPUT -->
+        <div class="chat-input">
+            <textarea id="chat_input" placeholder="Type your message..."></textarea>
+            <button class="primary" onclick="sendChat()">Send</button>
+        </div>
+
     </section>
+
   </section>
+
 </div>
 </main>
+
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
-    AI Marketing System
+    AI Marketing System • Smart Automation Mode
 </footer>
+
+<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
+
 </body>
 </html>
