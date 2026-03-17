@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Marketing Automation</title>
+
+  <!-- GOOGLE FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,8 +16,8 @@
 
 <!-- ================= HEADER ================= -->
 <header class="top-bar">
-    <h1>AI Marketing Automation</h1>
-    <p>Command-based AI marketing system</p>
+    <div class="logo">🚀 AI Marketing</div>
+    <div class="subtitle">Smart Automation Dashboard</div>
 </header>
 
 <!-- ================= MAIN ================= -->
@@ -21,7 +26,7 @@
 
   <!-- ========= SIDEBAR ========= -->
   <aside class="sidebar">
-      <h2>Campaigns</h2>
+      <h2>⚡ Campaigns</h2>
       <div id="campaign_list">
           <p class="muted">No campaigns yet...</p>
       </div>
@@ -31,18 +36,19 @@
   <section class="main-panel">
 
     <!-- ===== COMMAND BOX ===== -->
-    <section class="command-box">
-        <h2>Run AI Command</h2>
-        <textarea id="command_input"
-        placeholder="Example: create affiliate marketing campaign for fitness products in USA"></textarea>
+    <section class="command-box glow">
+        <h2>🧠 Run AI Command</h2>
 
-        <button class="primary" onclick="runCommand()">Run Command</button>
+        <textarea id="command_input"
+        placeholder="Create affiliate campaign, generate blog, automate marketing..."></textarea>
+
+        <button class="primary" onclick="runCommand()">🚀 Run Command</button>
         <p id="status_indicator" class="muted">Status: Idle</p>
     </section>
 
     <!-- ===== RESULT BOX ===== -->
     <section class="result-box">
-        <h2>System Result</h2>
+        <h2>📊 System Result</h2>
         <div id="result">
             <p class="muted">No command executed yet...</p>
         </div>
@@ -51,17 +57,17 @@
     <!-- ===== CHAT SYSTEM ===== -->
     <section class="history-box">
 
-        <h2>Campaign Chat</h2>
+        <h2>💬 Campaign Chat</h2>
 
         <!-- CHAT DISPLAY -->
         <div id="history_result" class="chat-box">
-            <p class="muted">Select or create a campaign to start chat...</p>
+            <p class="muted">Start conversation...</p>
         </div>
 
         <!-- CHAT INPUT -->
         <div class="chat-input">
-            <textarea id="chat_input" placeholder="Type your message..."></textarea>
-            <button class="primary" onclick="sendChat()">Send</button>
+            <textarea id="chat_input" placeholder="Ask anything..."></textarea>
+            <button class="primary" onclick="sendChat()">➤</button>
         </div>
 
     </section>
@@ -73,11 +79,10 @@
 
 <!-- ================= FOOTER ================= -->
 <footer class="footer">
-    AI Marketing System • Smart Automation Mode
+    ⚡ AI Marketing System • PRO Automation Mode
 </footer>
 
-<!-- ================= SCRIPT ================= -->
 <script src="script.js"></script>
 
 </body>
-</html>
+</html>       
