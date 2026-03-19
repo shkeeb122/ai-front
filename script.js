@@ -5,7 +5,8 @@ let currentCampaign = null;
 // ================= INIT =================
 window.onload = () => {
     loadCampaigns();
-    loadMemory(); // NEW FEATURE ADDED
+    loadMemory(); // NEW FEATURE
+    restoreLastCampaign(); // NEW: restore last open campaign
 };
 
 // ================= LOAD CAMPAIGNS =================
@@ -37,9 +38,33 @@ async function loadCampaigns(){
             list.appendChild(div);
         });
 
+        // Highlight & auto open last campaign if exists
+        const last = localStorage.getItem("lastCampaign");
+        if(last){
+            const el = Array.from(document.getElementsByClassName("campaign-item"))
+                .find(d => d.innerText === data.campaigns.find(c=>c.id===last)?.niche);
+            if(el) el.click();
+        }
+
     }catch(e){
         console.error("Campaign load error", e);
     }
+}
+
+// ================= RESTORE LAST CAMPAIGN =================
+function restoreLastCampaign(){
+    const last = localStorage.getItem("lastCampaign");
+    if(last) openCampaign(last);
+}
+
+// ================= OPEN CAMPAIGN =================
+async function openCampaign(id){
+    currentCampaign = id;
+    localStorage.setItem("lastCampaign", id); // save last opened campaign
+
+    const res = await fetch(`${API_URL}/campaign/${id}`);
+    const data = await res.json();
+    renderChat(data.conversation);
 }
 
 // ================= LOAD MEMORY =================
@@ -97,24 +122,17 @@ async function runCommand(){
 
         const data = await res.json();
         currentCampaign = data.campaign_id;
+        localStorage.setItem("lastCampaign", currentCampaign); // save last command campaign
 
         renderChat(data.conversation);
         loadCampaigns();
-        loadMemory(); // NEW FEATURE ADDED: update memory sidebar
+        loadMemory();
 
         setStatus("Completed ✅");
 
     }catch(e){
         setStatus("Error ❌");
     }
-}
-
-// ================= OPEN CAMPAIGN =================
-async function openCampaign(id){
-    currentCampaign = id;
-    const res = await fetch(`${API_URL}/campaign/${id}`);
-    const data = await res.json();
-    renderChat(data.conversation);
 }
 
 // ================= SEND CHAT =================
@@ -136,7 +154,7 @@ async function sendChat(){
 
         const data = await res.json();
         renderChat(data.conversation);
-        loadMemory(); // NEW FEATURE ADDED: update memory after chat
+        loadMemory();
 
     }catch(e){
         appendMessage("bot", "Error getting response.");
@@ -184,4 +202,4 @@ function scrollBottom(){
 // ================= STATUS =================
 function setStatus(text){
     document.getElementById("status_indicator").innerText = "Status: " + text;
-      }
+}
