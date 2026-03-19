@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -14,28 +14,29 @@
 
 <body>
 
-<!-- ================= HEADER ================= -->
 <header class="top-bar">
     <div class="logo">🚀 AI Marketing</div>
     <div class="subtitle">Smart Automation Dashboard</div>
 </header>
 
-<!-- ================= MAIN ================= -->
 <main class="app">
 <div class="container">
 
-  <!-- ========= SIDEBAR ========= -->
   <aside class="sidebar">
       <h2>⚡ Campaigns</h2>
       <div id="campaign_list">
           <p class="muted">No campaigns yet...</p>
       </div>
+
+      <h2>📝 Memory History</h2>
+      <div id="memory_list">
+          <p class="muted">No memory yet...</p>
+      </div>
+      <button class="primary" onclick="clearMemory()">🗑️ Clear Memory</button>
   </aside>
 
-  <!-- ========= MAIN PANEL ========= -->
   <section class="main-panel">
 
-    <!-- ===== COMMAND BOX ===== -->
     <section class="command-box glow">
         <h2>🧠 Run AI Command</h2>
 
@@ -46,7 +47,6 @@
         <p id="status_indicator" class="muted">Status: Idle</p>
     </section>
 
-    <!-- ===== RESULT BOX ===== -->
     <section class="result-box">
         <h2>📊 System Result</h2>
         <div id="result">
@@ -54,22 +54,16 @@
         </div>
     </section>
 
-    <!-- ===== CHAT SYSTEM ===== -->
     <section class="history-box">
-
         <h2>💬 Campaign Chat</h2>
-
-        <!-- CHAT DISPLAY -->
         <div id="history_result" class="chat-box">
             <p class="muted">Start conversation...</p>
         </div>
 
-        <!-- CHAT INPUT -->
         <div class="chat-input">
             <textarea id="chat_input" placeholder="Ask anything..."></textarea>
             <button class="primary" onclick="sendChat()">➤</button>
         </div>
-
     </section>
 
   </section>
@@ -77,7 +71,6 @@
 </div>
 </main>
 
-<!-- ================= FOOTER ================= -->
 <footer class="footer">
     ⚡ AI Marketing System • PRO Automation Mode
 </footer>
@@ -85,4 +78,4 @@
 <script src="script.js"></script>
 
 </body>
-</html>       
+</html>
