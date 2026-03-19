@@ -1,10 +1,11 @@
-  const API_URL = "https://umar-k20u.onrender.com";
+const API_URL = "https://umar-k20u.onrender.com";
 
 let currentCampaign = null;
 
 // ================= INIT =================
 window.onload = () => {
     loadCampaigns();
+    loadMemory(); // NEW FEATURE ADDED
 };
 
 // ================= LOAD CAMPAIGNS =================
@@ -29,7 +30,6 @@ async function loadCampaigns(){
             div.onclick = ()=>{
                 document.querySelectorAll(".campaign-item")
                 .forEach(el=>el.classList.remove("active"));
-
                 div.classList.add("active");
                 openCampaign(c.id);
             };
@@ -39,6 +39,45 @@ async function loadCampaigns(){
 
     }catch(e){
         console.error("Campaign load error", e);
+    }
+}
+
+// ================= LOAD MEMORY =================
+async function loadMemory(){
+    try{
+        const res = await fetch(`${API_URL}/memory/list`);
+        const data = await res.json();
+
+        const memBox = document.getElementById("memory_list");
+        memBox.innerHTML = "";
+
+        if(!data.memory || data.memory.length===0){
+            memBox.innerHTML = "<p class='muted'>No memory yet...</p>";
+            return;
+        }
+
+        data.memory.forEach(m=>{
+            const div = document.createElement("div");
+            div.className = "memory-item";
+            div.innerHTML = `<strong>User:</strong> ${m.user}<br><strong>AI:</strong> ${m.ai}`;
+            memBox.appendChild(div);
+        });
+
+    }catch(e){
+        console.error("Memory load error", e);
+    }
+}
+
+// ================= CLEAR MEMORY =================
+async function clearMemory(){
+    if(!confirm("Are you sure to clear memory?")) return;
+
+    try{
+        await fetch(`${API_URL}/memory/delete`,{method:"POST"});
+        loadMemory();
+        alert("Memory cleared ✅");
+    }catch(e){
+        alert("Error clearing memory ❌");
     }
 }
 
@@ -57,11 +96,11 @@ async function runCommand(){
         });
 
         const data = await res.json();
-
         currentCampaign = data.campaign_id;
 
         renderChat(data.conversation);
         loadCampaigns();
+        loadMemory(); // NEW FEATURE ADDED: update memory sidebar
 
         setStatus("Completed ✅");
 
@@ -73,10 +112,8 @@ async function runCommand(){
 // ================= OPEN CAMPAIGN =================
 async function openCampaign(id){
     currentCampaign = id;
-
     const res = await fetch(`${API_URL}/campaign/${id}`);
     const data = await res.json();
-
     renderChat(data.conversation);
 }
 
@@ -86,10 +123,9 @@ async function sendChat(){
     const msg = input.value.trim();
 
     if(!msg || !currentCampaign) return;
-
     input.value = "";
 
-    appendMessage("user", msg); // instant show
+    appendMessage("user", msg);
 
     try{
         const res = await fetch(`${API_URL}/chat/${currentCampaign}`,{
@@ -99,8 +135,8 @@ async function sendChat(){
         });
 
         const data = await res.json();
-
         renderChat(data.conversation);
+        loadMemory(); // NEW FEATURE ADDED: update memory after chat
 
     }catch(e){
         appendMessage("bot", "Error getting response.");
@@ -110,14 +146,12 @@ async function sendChat(){
 // ================= RENDER CHAT =================
 function renderChat(conv){
     const box = document.getElementById("history_result");
-
     if(!conv || conv.length===0){
         box.innerHTML = "<p class='muted'>No chat yet...</p>";
         return;
     }
 
     box.innerHTML = "";
-
     conv.forEach(m=>{
         appendMessage(m.role, m.content, false);
     });
@@ -128,17 +162,14 @@ function renderChat(conv){
 // ================= APPEND MESSAGE =================
 function appendMessage(role, text, scroll=true){
     const box = document.getElementById("history_result");
-
     const div = document.createElement("div");
     div.className = role === "user" ? "msg user" : "msg bot";
 
-    // clickable links
     text = text.replace(/(https?:\/\/[^\s]+)/g,
         '<a href="$1" target="_blank">$1</a>'
     );
 
     div.innerHTML = text;
-
     box.appendChild(div);
 
     if(scroll) scrollBottom();
@@ -153,4 +184,4 @@ function scrollBottom(){
 // ================= STATUS =================
 function setStatus(text){
     document.getElementById("status_indicator").innerText = "Status: " + text;
-}  
+      }
