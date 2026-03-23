@@ -60,8 +60,8 @@ async function openCampaign(id) {
 
     const res = await fetch(`${API_URL}/chat/${id}`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: ""}) // empty to get full conversation
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "" }) // fetch full conversation
     });
     const data = await res.json();
     renderChat(data.conversation);
@@ -103,7 +103,7 @@ async function clearMemory() {
     if (!confirm("Are you sure to clear memory?")) return;
 
     try {
-        await fetch(`${API_URL}/memory/delete`, {method: "POST"});
+        await fetch(`${API_URL}/memory/delete`, { method: "POST" });
         loadMemory();
         alert("Memory cleared ✅");
     } catch (e) {
@@ -120,8 +120,8 @@ async function runCommand() {
     try {
         const res = await fetch(`${API_URL}/command`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({command: cmd})
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ command: cmd })
         });
         const data = await res.json();
         currentCampaign = data.campaign_id;
@@ -147,8 +147,8 @@ async function sendChat() {
     try {
         const res = await fetch(`${API_URL}/chat/${currentCampaign}`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: msg})
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: msg })
         });
         const data = await res.json();
         renderChat(data.conversation);
@@ -172,7 +172,7 @@ function renderChat(conv) {
 }
 
 // ================= APPEND MESSAGE =================
-function appendMessage(role, text, scroll=true) {
+function appendMessage(role, text, scroll = true) {
     const box = document.getElementById("history_result");
     const div = document.createElement("div");
     div.className = role === "user" ? "msg user" : "msg bot";
