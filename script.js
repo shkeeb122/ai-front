@@ -42,9 +42,7 @@ async function loadCampaigns() {
                 .find(d => d.innerText === data.campaigns.find(c => c.id === last)?.niche);
             if (el) el.click();
         }
-    } catch (e) {
-        console.error("Campaign load error", e);
-    }
+    } catch (e) { console.error("Campaign load error", e); }
 }
 
 // ================= RESTORE LAST CAMPAIGN =================
@@ -61,7 +59,7 @@ async function openCampaign(id) {
     const res = await fetch(`${API_URL}/chat/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: "" }) // fetch full conversation
+        body: JSON.stringify({ message: "" })
     });
     const data = await res.json();
     renderChat(data.conversation);
@@ -93,57 +91,28 @@ async function loadMemory() {
             memBox.appendChild(div);
         });
 
-    } catch (e) {
-        console.error("Memory load error", e);
-    }
+    } catch (e) { console.error("Memory load error", e); }
 }
 
 // ================= CLEAR MEMORY =================
 async function clearMemory() {
     if (!confirm("Are you sure to clear memory?")) return;
-
     try {
         await fetch(`${API_URL}/memory/delete`, { method: "POST" });
         loadMemory();
         alert("Memory cleared ✅");
-    } catch (e) {
-        alert("Error clearing memory ❌");
-    }
+    } catch (e) { alert("Error clearing memory ❌"); }
 }
 
-// ================= RUN COMMAND =================
-async function runCommand() {
-    const cmd = document.getElementById("command_input").value.trim();
-    if (!cmd) return;
-    setStatus("Running...");
-
-    try {
-        const res = await fetch(`${API_URL}/command`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ command: cmd })
-        });
-        const data = await res.json();
-        currentCampaign = data.campaign_id;
-        localStorage.setItem("lastCampaign", currentCampaign);
-        renderChat(data.conversation);
-        loadCampaigns();
-        loadMemory();
-        setStatus("Completed ✅");
-    } catch (e) {
-        setStatus("Error ❌");
-    }
-}
-
-// ================= SEND CHAT =================
+// ================= SEND CHAT / COMMAND =================
 async function sendChat() {
     const input = document.getElementById("chat_input");
     const msg = input.value.trim();
     if (!msg || !currentCampaign) return;
     input.value = "";
-
     appendMessage("user", msg);
 
+    setStatus("Typing...");
     try {
         const res = await fetch(`${API_URL}/chat/${currentCampaign}`, {
             method: "POST",
@@ -153,8 +122,10 @@ async function sendChat() {
         const data = await res.json();
         renderChat(data.conversation);
         loadMemory();
+        setStatus("Completed ✅");
     } catch (e) {
         appendMessage("bot", "Error getting response.");
+        setStatus("Error ❌");
     }
 }
 
@@ -165,23 +136,26 @@ function renderChat(conv) {
         box.innerHTML = "<p class='muted'>No chat yet...</p>";
         return;
     }
-
     box.innerHTML = "";
-    conv.forEach(m => appendMessage(m.role, m.content, false));
+    conv.forEach(m => typeMessage(m.role, m.content));
     scrollBottom();
 }
 
-// ================= APPEND MESSAGE =================
-function appendMessage(role, text, scroll = true) {
+// ================= TYPING EFFECT =================
+function typeMessage(role, text) {
     const box = document.getElementById("history_result");
     const div = document.createElement("div");
     div.className = role === "user" ? "msg user" : "msg bot";
-
-    text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
-    div.innerHTML = text;
     box.appendChild(div);
+    scrollBottom();
 
-    if (scroll) scrollBottom();
+    let i = 0;
+    const interval = setInterval(() => {
+        div.innerHTML = text.slice(0, i+1);
+        i++;
+        scrollBottom();
+        if(i === text.length) clearInterval(interval);
+    }, 15);
 }
 
 // ================= SCROLL =================
