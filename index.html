@@ -1,81 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Marketing Automation</title>
-
-  <!-- GOOGLE FONT -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Marketing Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <header class="top-bar">
-    <div class="logo">🚀 AI Marketing</div>
-    <div class="subtitle">Smart Automation Dashboard</div>
+  <div class="logo">🚀 AI Marketing</div>
+  <div class="subtitle">Smart Automation Dashboard</div>
 </header>
 
 <main class="app">
 <div class="container">
 
-  <aside class="sidebar">
-      <h2>⚡ Campaigns</h2>
-      <div id="campaign_list">
-          <p class="muted">No campaigns yet...</p>
-      </div>
+<aside class="sidebar">
+  <h2>⚡ Campaigns</h2>
+  <div id="campaign_list">
+    <p class="muted">No campaigns yet...</p>
+  </div>
 
-      <h2>📝 Memory History</h2>
-      <div id="memory_list">
-          <p class="muted">No memory yet...</p>
-      </div>
-      <button class="primary" onclick="clearMemory()">🗑️ Clear Memory</button>
-  </aside>
+  <h2>📝 Memory History</h2>
+  <div id="memory_list">
+    <p class="muted">No memory yet...</p>
+  </div>
+  <button class="primary" onclick="clearMemory()">🗑️ Clear Memory</button>
+</aside>
 
-  <section class="main-panel">
+<section class="main-panel">
 
-    <section class="command-box glow">
-        <h2>🧠 Run AI Command</h2>
+<section class="command-box glow">
+  <h2>🧠 Run AI Command</h2>
+  <textarea id="command_input" placeholder="Create affiliate campaign, generate blog, automate marketing..."></textarea>
+  <button class="primary" onclick="runCommand()">🚀 Run Command</button>
+  <p id="status_indicator" class="muted">Status: Idle</p>
+</section>
 
-        <textarea id="command_input"
-        placeholder="Create affiliate campaign, generate blog, automate marketing..."></textarea>
+<section class="result-box">
+  <h2>📊 System Result</h2>
+  <div id="result">
+    <p class="muted">No command executed yet...</p>
+  </div>
+</section>
 
-        <button class="primary" onclick="runCommand()">🚀 Run Command</button>
-        <p id="status_indicator" class="muted">Status: Idle</p>
-    </section>
+<section class="history-box">
+  <h2>💬 Campaign Chat</h2>
+  <div id="history_result" class="chat-box">
+    <p class="muted">Start conversation...</p>
+  </div>
+  <div class="chat-input">
+    <textarea id="chat_input" placeholder="Ask anything..."></textarea>
+    <button class="primary" onclick="sendChat()">➤</button>
+  </div>
+</section>
 
-    <section class="result-box">
-        <h2>📊 System Result</h2>
-        <div id="result">
-            <p class="muted">No command executed yet...</p>
-        </div>
-    </section>
-
-    <section class="history-box">
-        <h2>💬 Campaign Chat</h2>
-        <div id="history_result" class="chat-box">
-            <p class="muted">Start conversation...</p>
-        </div>
-
-        <div class="chat-input">
-            <textarea id="chat_input" placeholder="Ask anything..."></textarea>
-            <button class="primary" onclick="sendChat()">➤</button>
-        </div>
-    </section>
-
-  </section>
-
+</section>
 </div>
 </main>
 
 <footer class="footer">
-    ⚡ AI Marketing System • PRO Automation Mode
+⚡ AI Marketing System • PRO Automation Mode
 </footer>
 
 <script src="script.js"></script>
-
 </body>
 </html>
