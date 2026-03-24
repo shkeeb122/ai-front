@@ -1,34 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>AI Ultimate Pro Chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Ultimate Pro - Smart Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
 <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h2>AI Ultimate Pro</h2>
+            </div>
+            <button class="new-chat-btn" onclick="newChat()">
+                <i class="fas fa-plus"></i>
+                <span>New Chat</span>
+            </button>
+        </div>
+        
+        <div class="history-section">
+            <div class="history-header">
+                <i class="fas fa-history"></i>
+                <span>Chat History</span>
+                <button class="clear-all-btn" onclick="clearAllChats()" title="Clear All History">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+            <div id="campaign_list" class="history-list"></div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>Guest User</span>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </div>
+    </aside>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <button onclick="newChat()">+ New Chat</button>
-    </div>
-    <div id="campaign_list"></div>
-  </aside>
+    <!-- MAIN CHAT AREA -->
+    <main class="chat-container">
+        <div class="chat-header">
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="chat-info">
+                <i class="fas fa-comment-dots"></i>
+                <span id="chatTitle">New Conversation</span>
+            </div>
+            <div class="chat-actions">
+                <button class="action-btn" onclick="exportChat()" title="Export Chat">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="action-btn" onclick="clearCurrentChat()" title="Clear Chat">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
+        </div>
 
-  <!-- CHAT -->
-  <main class="chat-container">
-    <div id="history_result" class="chat-area"></div>
+        <div id="history_result" class="chat-area"></div>
 
-    <div class="chat-input">
-      <textarea id="chat_input" placeholder="Type message..."></textarea>
-      <button onclick="sendChat()">Send</button>
-      <button id="voiceBtn" onclick="startVoice()">🎤</button>
-    </div>
-  </main>
-
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    id="chat_input" 
+                    placeholder="Type your message here... (Press Enter to send)" 
+                    rows="1"
+                    maxlength="4000"
+                ></textarea>
+                <div class="input-actions">
+                    <button id="voiceBtn" onclick="startVoice()" class="voice-btn" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button onclick="sendChat()" class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-footer">
+                <span class="char-counter">0 / 4000</span>
+                <span class="info-text"><i class="fas fa-keyboard"></i> Shift + Enter for new line</span>
+            </div>
+        </div>
+    </main>
 </div>
 
 <script src="script.js"></script>
