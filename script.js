@@ -4,6 +4,7 @@ let currentCampaign = null;
 let recognition = null;
 let isTyping = false;
 let currentMessages = [];
+let allCampaigns = [];
 
 // ================= INITIALIZATION =================
 window.onload = () => {
@@ -72,12 +73,37 @@ function closeSidebar() {
     }
 }
 
+function toggleSearch() {
+    const searchBox = document.getElementById("search_history_box");
+    if (searchBox.style.display === "none") {
+        searchBox.style.display = "block";
+    } else {
+        searchBox.style.display = "none";
+        document.getElementById("history_search").value = "";
+        renderCampaigns(allCampaigns);
+    }
+}
+
+function searchHistory() {
+    const searchTerm = document.getElementById("history_search").value.toLowerCase();
+    const filtered = allCampaigns.filter(c => 
+        (c.niche || "").toLowerCase().includes(searchTerm) ||
+        (c.title || "").toLowerCase().includes(searchTerm)
+    );
+    renderCampaigns(filtered);
+}
+
 // ================= LOAD CAMPAIGNS =================
 async function loadCampaigns() {
     try {
         const response = await fetch(`${API_URL}/campaigns`);
         const data = await response.json();
-        renderCampaigns(data.campaigns || []);
+        allCampaigns = data.campaigns || [];
+        renderCampaigns(allCampaigns);
+        
+        // Update stats badge
+        const totalQuestions = allCampaigns.reduce((sum, c) => sum + (c.questions || 0), 0);
+        document.getElementById("totalQuestions").innerText = totalQuestions;
     } catch (error) {
         console.error("Error loading campaigns:", error);
         showToast("Failed to load chats", "error");
@@ -99,12 +125,15 @@ function renderCampaigns(campaigns) {
         const div = document.createElement("div");
         div.className = `chat-item ${currentCampaign === campaign.id ? "active" : ""}`;
         div.innerHTML = `
-            <span>${escapeHtml(campaign.niche || "Untitled Chat")}</span>
+            <div class="chat-item-info">
+                <div class="chat-item-title">${escapeHtml(campaign.niche || campaign.title || "Untitled Chat")}</div>
+                <div class="chat-item-preview">${campaign.messages || 0} messages • ${campaign.questions || 0} questions</div>
+            </div>
             <div class="chat-item-buttons">
-                <button onclick="renameChat('${campaign.id}')" title="Rename">
+                <button onclick="event.stopPropagation(); renameChat('${campaign.id}')" title="Rename">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button onclick="deleteChat('${campaign.id}')" title="Delete">
+                <button onclick="event.stopPropagation(); deleteChat('${campaign.id}')" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -138,6 +167,7 @@ function removeActiveClass() {
 // ================= OPEN CHAT =================
 async function openCampaign(id, element) {
     try {
+        showToast("Loading chat...", "info");
         currentCampaign = id;
         document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
         if (element) element.classList.add("active");
@@ -148,7 +178,7 @@ async function openCampaign(id, element) {
         if (data.conversation) {
             currentMessages = data.conversation;
             renderChat(data.conversation);
-            updateChatTitle(getChatTitle(data.conversation));
+            updateChatTitle(data.title || getChatTitle(data.conversation));
         }
         
         closeSidebar();
@@ -194,10 +224,16 @@ async function sendChat() {
             currentCampaign = data.campaign_id;
         }
         
+        let aiResponse = data.response || (data.conversation ? data.conversation[data.conversation.length - 1]?.content : "");
+        
         if (data.conversation) {
             currentMessages = data.conversation;
             renderChat(data.conversation);
             updateChatTitle(getChatTitle(data.conversation));
+        } else if (aiResponse) {
+            hideTypingIndicator();
+            appendMessage("ai", aiResponse);
+            currentMessages.push({ role: "assistant", content: aiResponse });
         }
         
         await loadCampaigns();
@@ -233,7 +269,6 @@ function appendMessage(role, content) {
     const box = document.getElementById("history_result");
     if (!box) return;
     
-    // Remove welcome message if exists
     const welcomeMsg = box.querySelector(".welcome-message");
     if (welcomeMsg) {
         welcomeMsg.remove();
@@ -256,6 +291,13 @@ function appendMessageToContainer(role, content) {
     contentDiv.className = "message-content";
     contentDiv.innerHTML = formatMessage(content);
     
+    // Apply syntax highlighting for code blocks
+    contentDiv.querySelectorAll('pre code').forEach((block) => {
+        if (typeof hljs !== 'undefined') {
+            hljs.highlightElement(block);
+        }
+    });
+    
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(contentDiv);
     
@@ -263,12 +305,22 @@ function appendMessageToContainer(role, content) {
 }
 
 function formatMessage(content) {
-    // Convert markdown-like formatting
-    let formatted = escapeHtml(content);
+    if (!content) return "";
+    
+    let formatted = content;
+    
+    // Convert URLs to clickable links
+    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+    formatted = formatted.replace(urlRegex, (url) => {
+        if (url.includes('/blog/')) {
+            return `<div class="blog-card"><a href="${url}" target="_blank" class="blog-btn">📖 Read Full Blog →</a><span class="blog-url">${url}</span></div>`;
+        }
+        return `<a href="${url}" target="_blank" class="link">🔗 ${url}</a>`;
+    });
     
     // Code blocks
     formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-        return `<pre><code class="language-${lang}">${code.trim()}</code></pre>`;
+        return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
     });
     
     // Inline code
@@ -279,6 +331,11 @@ function formatMessage(content) {
     
     // Italic
     formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Headings
+    formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+    formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+    formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
     
     // Line breaks
     formatted = formatted.replace(/\n/g, '<br>');
@@ -320,17 +377,21 @@ function hideTypingIndicator() {
 
 // ================= DELETE CHAT =================
 async function deleteChat(id) {
-    if (!confirm("Are you sure you want to delete this chat?")) return;
+    if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
     
     try {
-        await fetch(`${API_URL}/campaign/delete/${id}`, { method: "POST" });
-        await loadCampaigns();
-        
-        if (currentCampaign === id) {
-            newChat();
+        const response = await fetch(`${API_URL}/campaign/delete/${id}`, { method: "DELETE" });
+        if (response.ok) {
+            await loadCampaigns();
+            
+            if (currentCampaign === id) {
+                newChat();
+            }
+            
+            showToast("Chat deleted successfully", "success");
+        } else {
+            throw new Error("Delete failed");
         }
-        
-        showToast("Chat deleted successfully", "success");
     } catch (error) {
         console.error("Error deleting chat:", error);
         showToast("Failed to delete chat", "error");
@@ -343,13 +404,23 @@ async function renameChat(id) {
     if (!newName || newName.trim() === "") return;
     
     try {
-        await fetch(`${API_URL}/campaign/rename/${id}`, {
+        const response = await fetch(`${API_URL}/campaign/rename/${id}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: newName.trim() })
         });
-        await loadCampaigns();
-        showToast("Chat renamed successfully", "success");
+        
+        if (response.ok) {
+            await loadCampaigns();
+            showToast("Chat renamed successfully", "success");
+            
+            // Update current chat title if it's the active one
+            if (currentCampaign === id) {
+                updateChatTitle(newName.trim());
+            }
+        } else {
+            throw new Error("Rename failed");
+        }
     } catch (error) {
         console.error("Error renaming chat:", error);
         showToast("Failed to rename chat", "error");
@@ -361,10 +432,10 @@ async function clearAllChats() {
     if (!confirm("⚠️ This will delete ALL chats. This action cannot be undone. Continue?")) return;
     
     try {
-        const campaigns = await fetch(`${API_URL}/campaigns`).then(res => res.json());
+        const campaigns = allCampaigns;
         
-        for (const campaign of (campaigns.campaigns || [])) {
-            await fetch(`${API_URL}/campaign/delete/${campaign.id}`, { method: "POST" });
+        for (const campaign of campaigns) {
+            await fetch(`${API_URL}/campaign/delete/${campaign.id}`, { method: "DELETE" });
         }
         
         await loadCampaigns();
@@ -384,7 +455,7 @@ function exportChat() {
     }
     
     const exportData = {
-        title: getChatTitle(currentMessages),
+        title: document.getElementById("chatTitle").innerText,
         date: new Date().toISOString(),
         messages: currentMessages
     };
@@ -424,13 +495,15 @@ function startVoice() {
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
+    recognition.lang = "hi-IN, en-IN";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     
+    const voiceBtn = document.getElementById("voiceBtn");
+    
     recognition.onstart = () => {
-        showToast("Listening... Speak now", "success");
-        document.getElementById("voiceBtn").style.background = "var(--error)";
+        showToast("🎤 Listening... Speak now", "success");
+        voiceBtn.classList.add("active");
     };
     
     recognition.onresult = (event) => {
@@ -443,14 +516,39 @@ function startVoice() {
     recognition.onerror = (event) => {
         console.error("Voice recognition error:", event.error);
         showToast("Voice recognition failed", "error");
-        document.getElementById("voiceBtn").style.background = "";
+        voiceBtn.classList.remove("active");
     };
     
     recognition.onend = () => {
-        document.getElementById("voiceBtn").style.background = "";
+        voiceBtn.classList.remove("active");
     };
     
     recognition.start();
+}
+
+// ================= SET COMMAND =================
+function setCommand(command) {
+    document.getElementById("chat_input").value = command;
+    updateCharCount();
+    sendChat();
+}
+
+// ================= STATS =================
+function showStats() {
+    const totalMessages = currentMessages.length;
+    const userMessages = currentMessages.filter(m => m.role === "user").length;
+    const aiMessages = currentMessages.filter(m => m.role === "assistant").length;
+    const questions = currentMessages.filter(m => m.role === "user" && (m.content.includes("?") || /(kya|kaise|kyu|kahan)/i.test(m.content))).length;
+    
+    document.getElementById("statTotalMessages").innerText = totalMessages;
+    document.getElementById("statTotalQuestions").innerText = questions;
+    document.getElementById("statAiMessages").innerText = aiMessages;
+    
+    document.getElementById("statsModal").style.display = "flex";
+}
+
+function closeStats() {
+    document.getElementById("statsModal").style.display = "none";
 }
 
 // ================= HELPER FUNCTIONS =================
@@ -466,7 +564,12 @@ function showWelcomeMessage() {
                 </div>
                 <h2>Welcome to AI Ultimate Pro</h2>
                 <p>Your intelligent assistant, ready to help you anytime</p>
-                <p style="font-size: 14px; margin-top: 20px;">✨ Ask me anything • Get instant answers • Smart conversations</p>
+                <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
+                    <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
+                    <button class="suggestion-chip" onclick="setCommand('Aur batao')">💬 Aur batao</button>
+                    <button class="suggestion-chip" onclick="setCommand('Blog banao car ke baare mein')">📝 Blog banao</button>
+                </div>
             </div>
         `;
     }
@@ -530,6 +633,16 @@ document.addEventListener("click", (e) => {
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                 sidebar.classList.remove("open");
             }
+        }
+    }
+});
+
+// Close modal on outside click
+document.addEventListener("click", (e) => {
+    const modal = document.getElementById("statsModal");
+    if (modal && modal.style.display === "flex") {
+        if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
+            closeStats();
         }
     }
 });
