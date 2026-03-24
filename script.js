@@ -87,8 +87,7 @@ function toggleSearch() {
 function searchHistory() {
     const searchTerm = document.getElementById("history_search").value.toLowerCase();
     const filtered = allCampaigns.filter(c => 
-        (c.niche || "").toLowerCase().includes(searchTerm) ||
-        (c.title || "").toLowerCase().includes(searchTerm)
+        (c.niche || c.title || "").toLowerCase().includes(searchTerm)
     );
     renderCampaigns(filtered);
 }
@@ -101,7 +100,6 @@ async function loadCampaigns() {
         allCampaigns = data.campaigns || [];
         renderCampaigns(allCampaigns);
         
-        // Update stats badge
         const totalQuestions = allCampaigns.reduce((sum, c) => sum + (c.questions || 0), 0);
         document.getElementById("totalQuestions").innerText = totalQuestions;
     } catch (error) {
@@ -117,7 +115,7 @@ function renderCampaigns(campaigns) {
     list.innerHTML = "";
     
     if (campaigns.length === 0) {
-        list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p></div>';
+        list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p><p style="font-size:12px">Start a new chat!</p></div>';
         return;
     }
     
@@ -127,7 +125,7 @@ function renderCampaigns(campaigns) {
         div.innerHTML = `
             <div class="chat-item-info">
                 <div class="chat-item-title">${escapeHtml(campaign.niche || campaign.title || "Untitled Chat")}</div>
-                <div class="chat-item-preview">${campaign.messages || 0} messages • ${campaign.questions || 0} questions</div>
+                <div class="chat-item-preview">${campaign.messages || 0} msgs • ${campaign.questions || 0} Qs</div>
             </div>
             <div class="chat-item-buttons">
                 <button onclick="event.stopPropagation(); renameChat('${campaign.id}')" title="Rename">
@@ -291,7 +289,6 @@ function appendMessageToContainer(role, content) {
     contentDiv.className = "message-content";
     contentDiv.innerHTML = formatMessage(content);
     
-    // Apply syntax highlighting for code blocks
     contentDiv.querySelectorAll('pre code').forEach((block) => {
         if (typeof hljs !== 'undefined') {
             hljs.highlightElement(block);
@@ -309,12 +306,21 @@ function formatMessage(content) {
     
     let formatted = content;
     
-    // Convert URLs to clickable links
-    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+    // Convert blog URLs to beautiful clickable cards
+    const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
+    formatted = formatted.replace(blogRegex, (url) => {
+        return `<div class="blog-card">
+                    <a href="${url}" target="_blank" class="blog-btn">
+                        <i class="fas fa-book-open"></i> Read Full Blog
+                    </a>
+                    <span class="blog-url">${url}</span>
+                </div>`;
+    });
+    
+    // Convert regular URLs to clickable links
+    const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
     formatted = formatted.replace(urlRegex, (url) => {
-        if (url.includes('/blog/')) {
-            return `<div class="blog-card"><a href="${url}" target="_blank" class="blog-btn">📖 Read Full Blog →</a><span class="blog-url">${url}</span></div>`;
-        }
+        if (url.includes('/blog/')) return url; // Already handled
         return `<a href="${url}" target="_blank" class="link">🔗 ${url}</a>`;
     });
     
@@ -383,11 +389,9 @@ async function deleteChat(id) {
         const response = await fetch(`${API_URL}/campaign/delete/${id}`, { method: "DELETE" });
         if (response.ok) {
             await loadCampaigns();
-            
             if (currentCampaign === id) {
                 newChat();
             }
-            
             showToast("Chat deleted successfully", "success");
         } else {
             throw new Error("Delete failed");
@@ -413,8 +417,6 @@ async function renameChat(id) {
         if (response.ok) {
             await loadCampaigns();
             showToast("Chat renamed successfully", "success");
-            
-            // Update current chat title if it's the active one
             if (currentCampaign === id) {
                 updateChatTitle(newName.trim());
             }
@@ -432,12 +434,9 @@ async function clearAllChats() {
     if (!confirm("⚠️ This will delete ALL chats. This action cannot be undone. Continue?")) return;
     
     try {
-        const campaigns = allCampaigns;
-        
-        for (const campaign of campaigns) {
+        for (const campaign of allCampaigns) {
             await fetch(`${API_URL}/campaign/delete/${campaign.id}`, { method: "DELETE" });
         }
-        
         await loadCampaigns();
         newChat();
         showToast("All chats cleared successfully", "success");
@@ -467,7 +466,6 @@ function exportChat() {
     a.download = `chat_export_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    
     showToast("Chat exported successfully", "success");
 }
 
@@ -513,8 +511,7 @@ function startVoice() {
         sendChat();
     };
     
-    recognition.onerror = (event) => {
-        console.error("Voice recognition error:", event.error);
+    recognition.onerror = () => {
         showToast("Voice recognition failed", "error");
         voiceBtn.classList.remove("active");
     };
@@ -538,12 +535,12 @@ function showStats() {
     const totalMessages = currentMessages.length;
     const userMessages = currentMessages.filter(m => m.role === "user").length;
     const aiMessages = currentMessages.filter(m => m.role === "assistant").length;
-    const questions = currentMessages.filter(m => m.role === "user" && (m.content.includes("?") || /(kya|kaise|kyu|kahan)/i.test(m.content))).length;
+    const questions = currentMessages.filter(m => m.role === "user" && 
+        (m.content.includes("?") || /(kya|kaise|kyu|kahan)/i.test(m.content))).length;
     
     document.getElementById("statTotalMessages").innerText = totalMessages;
     document.getElementById("statTotalQuestions").innerText = questions;
     document.getElementById("statAiMessages").innerText = aiMessages;
-    
     document.getElementById("statsModal").style.display = "flex";
 }
 
@@ -577,9 +574,7 @@ function showWelcomeMessage() {
 
 function updateChatTitle(title) {
     const titleElement = document.getElementById("chatTitle");
-    if (titleElement) {
-        titleElement.textContent = title;
-    }
+    if (titleElement) titleElement.textContent = title;
 }
 
 function getChatTitle(conversation) {
@@ -595,9 +590,7 @@ function getChatTitle(conversation) {
 function scrollToBottom() {
     setTimeout(() => {
         const box = document.getElementById("history_result");
-        if (box) {
-            box.scrollTop = box.scrollHeight;
-        }
+        if (box) box.scrollTop = box.scrollHeight;
     }, 100);
 }
 
@@ -614,31 +607,25 @@ function showToast(message, type = "info") {
         <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"}"></i>
         <span>${escapeHtml(message)}</span>
     `;
-    
     document.body.appendChild(toast);
-    
     setTimeout(() => {
         toast.style.animation = "slideInRight 0.3s reverse";
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-// ================= CLICK OUTSIDE SIDEBAR =================
+// ================= CLICK OUTSIDE =================
 document.addEventListener("click", (e) => {
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         const menuToggle = document.getElementById("menuToggle");
-        
         if (sidebar && sidebar.classList.contains("open")) {
             if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
                 sidebar.classList.remove("open");
             }
         }
     }
-});
-
-// Close modal on outside click
-document.addEventListener("click", (e) => {
+    
     const modal = document.getElementById("statsModal");
     if (modal && modal.style.display === "flex") {
         if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
