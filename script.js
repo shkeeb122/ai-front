@@ -456,4 +456,80 @@ function startVoice() {
 // ================= HELPER FUNCTIONS =================
 function showWelcomeMessage() {
     const box = document.getElementById("history_result");
-    if (!box) return
+    if (!box) return;
+    
+    if (box.children.length === 0) {
+        box.innerHTML = `
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h2>Welcome to AI Ultimate Pro</h2>
+                <p>Your intelligent assistant, ready to help you anytime</p>
+                <p style="font-size: 14px; margin-top: 20px;">✨ Ask me anything • Get instant answers • Smart conversations</p>
+            </div>
+        `;
+    }
+}
+
+function updateChatTitle(title) {
+    const titleElement = document.getElementById("chatTitle");
+    if (titleElement) {
+        titleElement.textContent = title;
+    }
+}
+
+function getChatTitle(conversation) {
+    if (!conversation || conversation.length === 0) return "New Conversation";
+    const firstUserMsg = conversation.find(msg => msg.role === "user");
+    if (firstUserMsg) {
+        const title = firstUserMsg.content.substring(0, 30);
+        return title.length === 30 ? title + "..." : title;
+    }
+    return "Untitled Chat";
+}
+
+function scrollToBottom() {
+    setTimeout(() => {
+        const box = document.getElementById("history_result");
+        if (box) {
+            box.scrollTop = box.scrollHeight;
+        }
+    }, 100);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"}"></i>
+        <span>${escapeHtml(message)}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = "slideInRight 0.3s reverse";
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ================= CLICK OUTSIDE SIDEBAR =================
+document.addEventListener("click", (e) => {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById("sidebar");
+        const menuToggle = document.getElementById("menuToggle");
+        
+        if (sidebar && sidebar.classList.contains("open")) {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove("open");
+            }
+        }
+    }
+});
