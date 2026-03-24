@@ -6,6 +6,7 @@
     <title>AI Ultimate Pro - Smart Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 </head>
 <body>
 
@@ -27,9 +28,17 @@
             <div class="history-header">
                 <i class="fas fa-history"></i>
                 <span>Chat History</span>
-                <button class="clear-all-btn" onclick="clearAllChats()" title="Clear All History">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <div class="history-actions">
+                    <button class="search-history-btn" onclick="toggleSearch()" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="clear-all-btn" onclick="clearAllChats()" title="Clear All">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="search_history_box" class="search-box" style="display: none;">
+                <input type="text" id="history_search" placeholder="🔍 Search chats..." onkeyup="searchHistory()">
             </div>
             <div id="campaign_list" class="history-list"></div>
         </div>
@@ -38,6 +47,10 @@
             <div class="user-info">
                 <i class="fas fa-user-circle"></i>
                 <span>Guest User</span>
+            </div>
+            <div class="stats-badge" id="statsBadge" onclick="showStats()">
+                <i class="fas fa-chart-line"></i>
+                <span id="totalQuestions">0</span>
             </div>
             <div class="status">
                 <span class="status-dot"></span>
@@ -69,6 +82,12 @@
         <div id="history_result" class="chat-area"></div>
 
         <div class="chat-input-container">
+            <div class="suggestions-bar" id="suggestionsBar">
+                <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
+                <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
+                <button class="suggestion-chip" onclick="setCommand('Aur batao')">💬 Aur batao</button>
+                <button class="suggestion-chip" onclick="setCommand('Blog banao')">📝 Blog banao</button>
+            </div>
             <div class="input-wrapper">
                 <textarea 
                     id="chat_input" 
@@ -93,6 +112,40 @@
     </main>
 </div>
 
+<!-- Stats Modal -->
+<div id="statsModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-chart-line"></i> Chat Statistics</h3>
+            <button class="modal-close" onclick="closeStats()">&times;</button>
+        </div>
+        <div class="modal-body" id="statsContent">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalMessages">0</span>
+                    <span class="stat-label">Total Messages</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalQuestions">0</span>
+                    <span class="stat-label">Total Questions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-robot"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statAiMessages">0</span>
+                    <span class="stat-label">AI Responses</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
