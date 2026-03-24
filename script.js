@@ -1,170 +1,75 @@
 const API_URL = "https://umar-k20u.onrender.com";
+
 let currentCampaign = null;
 
-// ================= INIT =================
-window.onload = () => {
+window.onload = async () => {
     loadCampaigns();
-    loadMemory();
-    restoreLastCampaign();
 };
 
-// ================= LOAD CAMPAIGNS =================
-async function loadCampaigns() {
-    try {
-        const res = await fetch(`${API_URL}/campaigns`);
-        const data = await res.json();
-        const list = document.getElementById("campaign_list");
-        list.innerHTML = "";
-
-        if (!data.campaigns || data.campaigns.length === 0) {
-            list.innerHTML = "<p class='muted'>No campaigns yet...</p>";
-            return;
-        }
-
-        data.campaigns.forEach(c => {
-            const div = document.createElement("div");
-            div.className = "campaign-item";
-            div.innerText = c.niche;
-
-            div.onclick = () => {
-                document.querySelectorAll(".campaign-item").forEach(el => el.classList.remove("active"));
-                div.classList.add("active");
-                openCampaign(c.id);
-            };
-
-            list.appendChild(div);
-        });
-
-        // Auto open last campaign
-        const last = localStorage.getItem("lastCampaign");
-        if (last) {
-            const el = Array.from(document.getElementsByClassName("campaign-item"))
-                .find(d => d.innerText === data.campaigns.find(c => c.id === last)?.niche);
-            if (el) el.click();
-        }
-    } catch (e) { console.error("Campaign load error", e); }
-}
-
-// ================= RESTORE LAST CAMPAIGN =================
-function restoreLastCampaign() {
-    const last = localStorage.getItem("lastCampaign");
-    if (last) openCampaign(last);
-}
-
-// ================= OPEN CAMPAIGN =================
-async function openCampaign(id) {
-    currentCampaign = id;
-    localStorage.setItem("lastCampaign", id);
-
-    const res = await fetch(`${API_URL}/chat/${id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: "" })
-    });
+async function loadCampaigns(){
+    const res = await fetch(`${API_URL}/campaigns`);
     const data = await res.json();
+    const list = document.getElementById("campaign_list");
+    list.innerHTML = "";
+
+    data.campaigns.forEach(c=>{
+        const div = document.createElement("p");
+        div.innerText = c.niche;
+        div.onclick = ()=>openCampaign(c.id);
+        list.appendChild(div);
+    });
+}
+
+async function runCommand(){
+    const cmd = document.getElementById("command_input").value;
+
+    const res = await fetch(`${API_URL}/command`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({command:cmd})
+    });
+
+    const data = await res.json();
+
+    currentCampaign = data.campaign_id;
+
+    renderChat(data.conversation);
+    loadCampaigns();
+}
+
+async function openCampaign(id){
+    currentCampaign = id;
+
+    const res = await fetch(`${API_URL}/campaign/${id}`);
+    const data = await res.json();
+
     renderChat(data.conversation);
 }
 
-// ================= LOAD MEMORY =================
-async function loadMemory() {
-    try {
-        const res = await fetch(`${API_URL}/memory/list`);
-        const data = await res.json();
-        const memBox = document.getElementById("memory_list");
-        memBox.innerHTML = "";
+async function sendChat(){
+    const msg = document.getElementById("chat_input").value;
 
-        if (!data.memory || data.memory.length === 0) {
-            memBox.innerHTML = "<p class='muted'>No memory yet...</p>";
-            return;
-        }
+    const res = await fetch(`${API_URL}/chat/${currentCampaign}`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:msg})
+    });
 
-        data.memory.forEach(m => {
-            const div = document.createElement("div");
-            div.className = "memory-item";
-            div.innerHTML = `<strong>User:</strong> ${m.user}<br><strong>AI:</strong> ${m.ai}`;
-            div.onclick = async () => {
-                const res = await fetch(`${API_URL}/memory/${m.id}`);
-                const memData = await res.json();
-                currentCampaign = localStorage.getItem("lastCampaign");
-                renderChat(memData.conversation);
-            };
-            memBox.appendChild(div);
-        });
+    const data = await res.json();
 
-    } catch (e) { console.error("Memory load error", e); }
+    renderChat(data.conversation);
+    document.getElementById("chat_input").value = "";
 }
 
-// ================= CLEAR MEMORY =================
-async function clearMemory() {
-    if (!confirm("Are you sure to clear memory?")) return;
-    try {
-        await fetch(`${API_URL}/memory/delete`, { method: "POST" });
-        loadMemory();
-        alert("Memory cleared ✅");
-    } catch (e) { alert("Error clearing memory ❌"); }
-}
-
-// ================= SEND CHAT / COMMAND =================
-async function sendChat() {
-    const input = document.getElementById("chat_input");
-    const msg = input.value.trim();
-    if (!msg || !currentCampaign) return;
-    input.value = "";
-    appendMessage("user", msg);
-
-    setStatus("Typing...");
-    try {
-        const res = await fetch(`${API_URL}/chat/${currentCampaign}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: msg })
-        });
-        const data = await res.json();
-        renderChat(data.conversation);
-        loadMemory();
-        setStatus("Completed ✅");
-    } catch (e) {
-        appendMessage("bot", "Error getting response.");
-        setStatus("Error ❌");
-    }
-}
-
-// ================= RENDER CHAT =================
-function renderChat(conv) {
+function renderChat(conv){
     const box = document.getElementById("history_result");
-    if (!conv || conv.length === 0) {
-        box.innerHTML = "<p class='muted'>No chat yet...</p>";
-        return;
-    }
-    box.innerHTML = "";
-    conv.forEach(m => typeMessage(m.role, m.content));
-    scrollBottom();
-}
 
-// ================= TYPING EFFECT =================
-function typeMessage(role, text) {
-    const box = document.getElementById("history_result");
-    const div = document.createElement("div");
-    div.className = role === "user" ? "msg user" : "msg bot";
-    box.appendChild(div);
-    scrollBottom();
+    let html = "";
+    conv.forEach(m=>{
+        let cls = m.role==="user"?"user-msg":"bot-msg";
+        html += `<div class="${cls}">${m.content.replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>')}</div>`;
+    });
 
-    let i = 0;
-    const interval = setInterval(() => {
-        div.innerHTML = text.slice(0, i+1);
-        i++;
-        scrollBottom();
-        if(i === text.length) clearInterval(interval);
-    }, 15);
-}
-
-// ================= SCROLL =================
-function scrollBottom() {
-    const box = document.getElementById("history_result");
+    box.innerHTML = html;
     box.scrollTop = box.scrollHeight;
-}
-
-// ================= STATUS =================
-function setStatus(text) {
-    document.getElementById("status_indicator").innerText = "Status: " + text;
 }
