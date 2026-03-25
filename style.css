@@ -55,6 +55,7 @@ body {
     border-right: 1px solid var(--border);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 100;
+    flex-shrink: 0;
 }
 
 .sidebar-header {
@@ -109,6 +110,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
 }
 
 .history-header {
@@ -120,6 +122,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     color: var(--text-secondary);
+    flex-shrink: 0;
 }
 
 .history-header i {
@@ -140,9 +143,10 @@ body {
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 5px;
+    padding: 6px 8px;
     border-radius: 6px;
     transition: all 0.2s;
+    font-size: 14px;
 }
 
 .search-history-btn:hover {
@@ -158,27 +162,55 @@ body {
 .search-box {
     padding: 12px;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
-.search-box input {
-    width: 100%;
-    padding: 10px 12px;
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
+    padding: 8px 12px;
+    gap: 8px;
+}
+
+.search-input-wrapper i {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.search-input-wrapper input {
+    flex: 1;
+    background: transparent;
+    border: none;
     color: var(--text-primary);
     font-size: 13px;
     outline: none;
 }
 
-.search-box input:focus {
-    border-color: var(--primary);
+.search-input-wrapper input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+}
+
+.search-clear:hover {
+    color: var(--error);
 }
 
 .history-list {
     flex: 1;
     overflow-y: auto;
     padding: 12px;
+    min-height: 0;
 }
 
 .chat-item {
@@ -288,6 +320,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .user-info {
@@ -347,6 +380,8 @@ body {
     flex-direction: column;
     background: var(--chat-bg);
     position: relative;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -360,6 +395,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
+    flex-shrink: 0;
 }
 
 .menu-toggle {
@@ -416,6 +452,7 @@ body {
     padding: 20px;
     overflow-y: auto;
     scroll-behavior: smooth;
+    min-height: 0;
 }
 
 /* Message Styles */
@@ -424,6 +461,7 @@ body {
     gap: 12px;
     margin-bottom: 20px;
     animation: fadeInUp 0.3s ease;
+    max-width: 100%;
 }
 
 @keyframes fadeInUp {
@@ -462,11 +500,21 @@ body {
     font-size: 15px;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    max-width: calc(100% - 48px);
 }
 
 .message-content p {
     margin-bottom: 10px;
 }
+
+.message-content h1, .message-content h2, .message-content h3 {
+    margin: 15px 0 10px 0;
+    color: var(--primary-light);
+}
+
+.message-content h1 { font-size: 1.5rem; }
+.message-content h2 { font-size: 1.3rem; }
+.message-content h3 { font-size: 1.1rem; }
 
 /* Code Block Styles */
 .message-content pre {
@@ -610,6 +658,7 @@ body {
     padding: 20px 24px;
     background: var(--chat-bg);
     border-top: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .suggestions-bar {
@@ -618,6 +667,7 @@ body {
     margin-bottom: 12px;
     overflow-x: auto;
     padding-bottom: 4px;
+    scrollbar-width: thin;
 }
 
 .suggestion-chip {
@@ -865,6 +915,7 @@ textarea::placeholder {
         height: 100vh;
         top: 0;
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        width: 280px;
     }
     
     .sidebar.open {
@@ -889,20 +940,7 @@ textarea::placeholder {
     
     .message-content {
         font-size: 14px;
-    }
-    
-    .welcome-message h2 {
-        font-size: 24px;
-    }
-    
-    .suggestions-bar {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .chat-actions {
-        display: none;
+        max-width: calc(100% - 40px);
     }
     
     .message-avatar {
@@ -911,12 +949,37 @@ textarea::placeholder {
         font-size: 14px;
     }
     
+    .welcome-message h2 {
+        font-size: 24px;
+    }
+    
+    .suggestions-bar {
+        display: flex;
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-actions {
+        display: none;
+    }
+    
     .chat-item-buttons {
         opacity: 1;
     }
     
     .input-wrapper {
         padding: 8px 12px;
+    }
+    
+    .suggestion-chip {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+    
+    .blog-btn {
+        padding: 8px 16px;
+        font-size: 12px;
     }
 }
 
