@@ -289,6 +289,7 @@ function appendMessageToContainer(role, content) {
     contentDiv.className = "message-content";
     contentDiv.innerHTML = formatMessage(content);
     
+    // Apply syntax highlighting for code blocks
     contentDiv.querySelectorAll('pre code').forEach((block) => {
         if (typeof hljs !== 'undefined') {
             hljs.highlightElement(block);
@@ -301,14 +302,17 @@ function appendMessageToContainer(role, content) {
     box.appendChild(messageDiv);
 }
 
+// ================= CORE FORMATTER – FIXES CLICKABLE BLOGS =================
 function formatMessage(content) {
     if (!content) return "";
     
-    let formatted = content;
+    // Step 1: Remove any existing anchor tags that might be malformed or plain HTML.
+    // We'll replace them with just the URL so our regex can catch them.
+    let sanitized = content.replace(/<a[^>]*>|<\/a>/gi, '');
     
-    // Convert blog URLs to beautiful clickable cards
+    // Step 2: Convert blog URLs to beautiful cards
     const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
-    formatted = formatted.replace(blogRegex, (url) => {
+    sanitized = sanitized.replace(blogRegex, (url) => {
         return `<div class="blog-card">
                     <a href="${url}" target="_blank" class="blog-btn">
                         <i class="fas fa-book-open"></i> Read Full Blog
@@ -317,36 +321,37 @@ function formatMessage(content) {
                 </div>`;
     });
     
-    // Convert regular URLs to clickable links
+    // Step 3: Convert other URLs to simple clickable links
     const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
-    formatted = formatted.replace(urlRegex, (url) => {
-        if (url.includes('/blog/')) return url; // Already handled
+    sanitized = sanitized.replace(urlRegex, (url) => {
+        if (url.includes('/blog/')) return url; // already handled
         return `<a href="${url}" target="_blank" class="link">🔗 ${url}</a>`;
     });
     
+    // Step 4: Markdown / code formatting
     // Code blocks
-    formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    sanitized = sanitized.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
     });
     
     // Inline code
-    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
+    sanitized = sanitized.replace(/`([^`]+)`/g, '<code>$1</code>');
     
     // Bold
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    sanitized = sanitized.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // Italic
-    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    sanitized = sanitized.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
     // Headings
-    formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
-    formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
-    formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+    sanitized = sanitized.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+    sanitized = sanitized.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+    sanitized = sanitized.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
     
     // Line breaks
-    formatted = formatted.replace(/\n/g, '<br>');
+    sanitized = sanitized.replace(/\n/g, '<br>');
     
-    return formatted;
+    return sanitized;
 }
 
 // ================= TYPING INDICATOR =================
