@@ -302,56 +302,66 @@ function appendMessageToContainer(role, content) {
     box.appendChild(messageDiv);
 }
 
-// ================= CORE FORMATTER – FIXES CLICKABLE BLOGS =================
+// ================= 🔥 FIXED FORMATTER - BLOG LINKS ALWAYS CLICKABLE =================
 function formatMessage(content) {
     if (!content) return "";
     
-    // Step 1: Remove any existing anchor tags that might be malformed or plain HTML.
-    // We'll replace them with just the URL so our regex can catch them.
-    let sanitized = content.replace(/<a[^>]*>|<\/a>/gi, '');
+    let formatted = content;
     
-    // Step 2: Convert blog URLs to beautiful cards
+    // 🔥 CRITICAL FIX: Check if content already has blog card or link
+    // Agar already formatted hai toh dobara format mat karo
+    const hasBlogCard = formatted.includes('class="blog-card"');
+    const hasBlogBtn = formatted.includes('class="blog-btn"');
+    const hasBlogPublished = formatted.includes('blog-published');
+    const hasAnchor = formatted.includes('<a href') && formatted.includes('target="_blank"');
+    
+    // Agar already formatted hai, waisa ka waisa return karo
+    if (hasBlogCard || hasBlogBtn || hasBlogPublished || hasAnchor) {
+        return formatted;
+    }
+    
+    // Step 1: Convert blog URLs to beautiful cards
     const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
-    sanitized = sanitized.replace(blogRegex, (url) => {
+    formatted = formatted.replace(blogRegex, (url) => {
         return `<div class="blog-card">
-                    <a href="${url}" target="_blank" class="blog-btn">
-                        <i class="fas fa-book-open"></i> Read Full Blog
+                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="blog-btn">
+                        <i class="fas fa-book-open"></i> 📖 पूरा ब्लॉग पढ़ें →
                     </a>
                     <span class="blog-url">${url}</span>
                 </div>`;
     });
     
-    // Step 3: Convert other URLs to simple clickable links
+    // Step 2: Convert other URLs to simple clickable links (skip if already handled)
     const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
-    sanitized = sanitized.replace(urlRegex, (url) => {
+    formatted = formatted.replace(urlRegex, (url) => {
         if (url.includes('/blog/')) return url; // already handled
-        return `<a href="${url}" target="_blank" class="link">🔗 ${url}</a>`;
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link">🔗 ${url}</a>`;
     });
     
-    // Step 4: Markdown / code formatting
+    // Step 3: Markdown / code formatting
     // Code blocks
-    sanitized = sanitized.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
     });
     
     // Inline code
-    sanitized = sanitized.replace(/`([^`]+)`/g, '<code>$1</code>');
+    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
     
     // Bold
-    sanitized = sanitized.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     
     // Italic
-    sanitized = sanitized.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
     
     // Headings
-    sanitized = sanitized.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
-    sanitized = sanitized.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
-    sanitized = sanitized.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
+    formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
+    formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
+    formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
     
     // Line breaks
-    sanitized = sanitized.replace(/\n/g, '<br>');
+    formatted = formatted.replace(/\n/g, '<br>');
     
-    return sanitized;
+    return formatted;
 }
 
 // ================= TYPING INDICATOR =================
