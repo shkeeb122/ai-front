@@ -1,57 +1,41 @@
 /* ==================================================================== */
 /* 📁 FILE: style.css                                                   */
 /* 🎯 ROLE: FRONTEND STYLES - Colors, Layout, Animations               */
-/* 📋 TOTAL SECTIONS: 12                                               */
-/* 🎨 COLOR SCHEME: Dark Theme (Primary: #6366f1)                      */
+/* 📋 TOTAL SECTIONS: 15                                               */
+/* 🔧 FIXES: Search box click issue fixed, z-index issues fixed        */
 /* ==================================================================== */
 
-/* ================= SECTION 1: RESET & GLOBAL VARIABLES ================= */
-/* 1.1 Reset all default browser styles */
+/* ================= SECTION 1: RESET & VARIABLES ================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* 1.2 CSS Variables (Color Palette) */
 :root {
-    /* Primary Colors */
     --primary: #6366f1;
     --primary-dark: #4f46e5;
     --primary-light: #818cf8;
-    
-    /* Secondary Colors */
     --secondary: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --success: #10b981;
-    --error: #ef4444;
-    
-    /* Background Colors */
     --dark-bg: #0f0f1a;
     --sidebar-bg: #1a1a2e;
     --chat-bg: #0f0f1a;
+    --message-user: linear-gradient(135deg, #6366f1, #4f46e5);
     --message-ai: #2d2d3a;
-    --hover: #2d2d3a;
-    
-    /* Text Colors */
     --text-primary: #f3f4f6;
     --text-secondary: #9ca3af;
-    
-    /* Borders */
     --border: #2d2d3a;
-    
-    /* Gradients */
-    --message-user: linear-gradient(135deg, #6366f1, #4f46e5);
-    
-    /* Border Radius */
+    --hover: #2d2d3a;
+    --success: #10b981;
+    --error: #ef4444;
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;
     --radius-lg: 1rem;
     --radius-xl: 1.5rem;
 }
 
-/* ================= SECTION 2: GLOBAL STYLES ================= */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     background: var(--dark-bg);
@@ -60,7 +44,7 @@ body {
     overflow: hidden;
 }
 
-/* ================= SECTION 3: LAYOUT ================= */
+/* ================= SECTION 2: LAYOUT ================= */
 .app {
     display: flex;
     height: 100vh;
@@ -69,8 +53,7 @@ body {
     position: relative;
 }
 
-/* ================= SECTION 4: SIDEBAR (Chat History) ================= */
-/* 4.1 Sidebar Container */
+/* ================= SECTION 3: SIDEBAR ================= */
 .sidebar {
     width: 280px;
     background: var(--sidebar-bg);
@@ -82,13 +65,11 @@ body {
     flex-shrink: 0;
 }
 
-/* 4.2 Sidebar Header */
 .sidebar-header {
     padding: 20px;
     border-bottom: 1px solid var(--border);
 }
 
-/* 4.3 Logo */
 .logo {
     display: flex;
     align-items: center;
@@ -109,7 +90,6 @@ body {
     -webkit-text-fill-color: transparent;
 }
 
-/* 4.4 New Chat Button */
 .new-chat-btn {
     width: 100%;
     padding: 12px;
@@ -132,7 +112,6 @@ body {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-/* 4.5 History Section */
 .history-section {
     flex: 1;
     display: flex;
@@ -141,7 +120,6 @@ body {
     min-height: 0;
 }
 
-/* 4.6 History Header */
 .history-header {
     padding: 16px 20px;
     display: flex;
@@ -152,6 +130,14 @@ body {
     font-weight: 500;
     color: var(--text-secondary);
     flex-shrink: 0;
+}
+
+.history-header i {
+    font-size: 16px;
+}
+
+.history-header span {
+    flex: 1;
 }
 
 .history-actions {
@@ -167,6 +153,7 @@ body {
     padding: 6px 8px;
     border-radius: 6px;
     transition: all 0.2s;
+    font-size: 14px;
 }
 
 .search-history-btn:hover {
@@ -179,29 +166,62 @@ body {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* 4.7 Search Box */
+/* ================= SECTION 4: SEARCH BOX (FIXED) ================= */
 .search-box {
     padding: 12px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    background: var(--sidebar-bg);
 }
 
-.search-box input {
-    width: 100%;
-    padding: 10px 12px;
+.search-input-wrapper {
+    display: flex;
+    align-items: center;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
+    padding: 8px 12px;
+    gap: 8px;
+}
+
+.search-input-wrapper i {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.search-input-wrapper input {
+    flex: 1;
+    background: transparent;
+    border: none;
     color: var(--text-primary);
     font-size: 13px;
     outline: none;
 }
 
-.search-box input:focus {
-    border-color: var(--primary);
+.search-input-wrapper input::placeholder {
+    color: var(--text-secondary);
 }
 
-/* 4.8 Chat List */
+.search-input-wrapper input:focus {
+    outline: none;
+}
+
+.search-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    transition: color 0.2s;
+}
+
+.search-clear:hover {
+    color: var(--error);
+}
+
 .history-list {
     flex: 1;
     overflow-y: auto;
@@ -209,7 +229,6 @@ body {
     min-height: 0;
 }
 
-/* 4.9 Chat Item */
 .chat-item {
     padding: 12px;
     margin-bottom: 8px;
@@ -303,7 +322,14 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* 4.10 Sidebar Footer */
+.chat-item button:first-child:hover {
+    color: var(--secondary);
+}
+
+.chat-item button:last-child:hover {
+    color: var(--error);
+}
+
 .sidebar-footer {
     padding: 16px 20px;
     border-top: 1px solid var(--border);
@@ -319,6 +345,10 @@ body {
     gap: 8px;
     font-size: 14px;
     color: var(--text-secondary);
+}
+
+.user-info i {
+    font-size: 20px;
 }
 
 .stats-badge {
@@ -359,8 +389,7 @@ body {
     50% { opacity: 0.5; }
 }
 
-/* ================= SECTION 5: MAIN CHAT AREA ================= */
-/* 5.1 Chat Container */
+/* ================= SECTION 5: CHAT AREA ================= */
 .chat-container {
     flex: 1;
     display: flex;
@@ -371,7 +400,6 @@ body {
     overflow: hidden;
 }
 
-/* 5.2 Chat Header */
 .chat-header {
     padding: 16px 24px;
     background: rgba(30, 30, 47, 0.95);
@@ -435,7 +463,6 @@ body {
     background: var(--hover);
 }
 
-/* 5.3 Messages Area */
 .chat-area {
     flex: 1;
     padding: 20px;
@@ -445,7 +472,6 @@ body {
 }
 
 /* ================= SECTION 6: MESSAGE STYLES ================= */
-/* 6.1 Message Container */
 .message {
     display: flex;
     gap: 12px;
@@ -465,7 +491,6 @@ body {
     }
 }
 
-/* 6.2 Message Avatar */
 .message-avatar {
     width: 36px;
     height: 36px;
@@ -485,7 +510,6 @@ body {
     background: var(--message-ai);
 }
 
-/* 6.3 Message Content */
 .message-content {
     flex: 1;
     line-height: 1.6;
@@ -499,10 +523,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* 6.4 Headings in Messages */
-.message-content h1, 
-.message-content h2, 
-.message-content h3 {
+.message-content h1, .message-content h2, .message-content h3 {
     margin: 15px 0 10px 0;
     color: var(--primary-light);
 }
@@ -511,7 +532,7 @@ body {
 .message-content h2 { font-size: 1.3rem; }
 .message-content h3 { font-size: 1.1rem; }
 
-/* 6.5 Code Blocks */
+/* Code Block Styles */
 .message-content pre {
     background: #1e1e1e;
     padding: 12px;
@@ -536,7 +557,6 @@ body {
 }
 
 /* ================= SECTION 7: BLOG CARDS & LINKS ================= */
-/* 7.1 Blog Card Container */
 .blog-card {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
     border-radius: 16px;
@@ -551,7 +571,6 @@ body {
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
 }
 
-/* 7.2 Blog Button */
 .blog-btn {
     display: inline-flex;
     align-items: center;
@@ -572,7 +591,6 @@ body {
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* 7.3 Blog URL */
 .blog-url {
     font-size: 11px;
     color: var(--text-secondary);
@@ -582,7 +600,6 @@ body {
     font-family: monospace;
 }
 
-/* 7.4 Regular Links */
 .link {
     color: #3b82f6;
     text-decoration: underline;
@@ -666,6 +683,7 @@ body {
     margin-bottom: 12px;
     overflow-x: auto;
     padding-bottom: 4px;
+    scrollbar-width: thin;
 }
 
 .suggestion-chip {
@@ -905,7 +923,7 @@ textarea::placeholder {
     background: var(--primary);
 }
 
-/* ================= SECTION 13: RESPONSIVE STYLES ================= */
+/* ================= SECTION 13: RESPONSIVE ================= */
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -1028,4 +1046,4 @@ textarea::placeholder {
     font-size: 48px;
     margin-bottom: 12px;
     opacity: 0.5;
-}
+        }
