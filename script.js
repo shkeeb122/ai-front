@@ -1,25 +1,50 @@
+// ====================================================================
+// 📁 FILE: script.js
+// 🎯 ROLE: FRONTEND LOGIC - User interaction, API calls, UI updates
+// 📋 TOTAL FUNCTIONS: 30+
+// 📋 TOTAL SECTIONS: 18
+// 🔧 FEATURES: Error handling, organized sections, easy maintenance
+// ====================================================================
 
-// ================= CONFIGURATION =================
+// ================= SECTION 1: CONFIGURATION =================
+// 1.1 API Configuration
 const API_URL = "https://umar-k20u.onrender.com";
+
+// 1.2 Global Variables
 let currentCampaign = null;
 let recognition = null;
 let isTyping = false;
 let currentMessages = [];
 let allCampaigns = [];
 
-// ================= INITIALIZATION =================
+// ================= SECTION 2: INITIALIZATION =================
 window.onload = () => {
-    loadCampaigns();
-    setupEventListeners();
-    setupAutoResize();
-    updateCharCount();
-    showWelcomeMessage();
+    initializeApp();
 };
 
-// ================= EVENT LISTENERS =================
+function initializeApp() {
+    try {
+        loadCampaigns();
+        setupEventListeners();
+        setupAutoResize();
+        updateCharCount();
+        showWelcomeMessage();
+        console.log("✅ App initialized successfully");
+    } catch (error) {
+        console.error("❌ Initialization error:", error);
+        showToast("Failed to initialize app", "error");
+    }
+}
+
+// ================= SECTION 3: EVENT LISTENERS =================
 function setupEventListeners() {
     const textarea = document.getElementById("chat_input");
     const sendBtn = document.getElementById("sendBtn");
+    
+    if (!textarea || !sendBtn) {
+        console.error("Required DOM elements not found");
+        return;
+    }
     
     textarea.addEventListener("keydown", function(e) {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -34,26 +59,40 @@ function setupEventListeners() {
     });
     
     sendBtn.addEventListener("click", () => sendChat());
+    
+    // Search box click prevention
+    const searchBox = document.getElementById("search_history_box");
+    if (searchBox) {
+        searchBox.addEventListener("click", function(e) {
+            e.stopPropagation();
+        });
+    }
 }
 
-// ================= AUTO RESIZE TEXTAREA =================
+// ================= SECTION 4: AUTO RESIZE TEXTAREA =================
 function setupAutoResize() {
     const textarea = document.getElementById("chat_input");
-    textarea.addEventListener("input", autoResizeTextarea);
+    if (textarea) {
+        textarea.addEventListener("input", autoResizeTextarea);
+    }
 }
 
 function autoResizeTextarea() {
     const textarea = document.getElementById("chat_input");
-    textarea.style.height = "auto";
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+    if (textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+    }
 }
 
 function updateCharCount() {
     const textarea = document.getElementById("chat_input");
-    const count = textarea.value.length;
     const counter = document.querySelector(".char-counter");
-    if (counter) {
+    
+    if (textarea && counter) {
+        const count = textarea.value.length;
         counter.textContent = `${count} / 4000`;
+        
         const sendBtn = document.getElementById("sendBtn");
         if (sendBtn) {
             sendBtn.disabled = count === 0 || count > 4000;
@@ -61,51 +100,79 @@ function updateCharCount() {
     }
 }
 
-// ================= SIDEBAR FUNCTIONS =================
+// ================= SECTION 5: SIDEBAR FUNCTIONS =================
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
-    sidebar.classList.toggle("open");
+    if (sidebar) {
+        sidebar.classList.toggle("open");
+    }
 }
 
 function closeSidebar() {
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
-        sidebar.classList.remove("open");
+        if (sidebar) {
+            sidebar.classList.remove("open");
+        }
     }
 }
 
 function toggleSearch() {
     const searchBox = document.getElementById("search_history_box");
-    if (searchBox.style.display === "none") {
-        searchBox.style.display = "block";
-    } else {
-        searchBox.style.display = "none";
-        document.getElementById("history_search").value = "";
-        renderCampaigns(allCampaigns);
+    const searchInput = document.getElementById("history_search");
+    
+    if (searchBox) {
+        if (searchBox.style.display === "none") {
+            searchBox.style.display = "block";
+            if (searchInput) searchInput.focus();
+        } else {
+            searchBox.style.display = "none";
+            if (searchInput) searchInput.value = "";
+            renderCampaigns(allCampaigns);
+        }
     }
 }
 
+function clearSearch() {
+    const searchInput = document.getElementById("history_search");
+    if (searchInput) {
+        searchInput.value = "";
+        renderCampaigns(allCampaigns);
+    }
+    toggleSearch();
+}
+
 function searchHistory() {
-    const searchTerm = document.getElementById("history_search").value.toLowerCase();
+    const searchTerm = document.getElementById("history_search")?.value.toLowerCase() || "";
     const filtered = allCampaigns.filter(c => 
         (c.niche || c.title || "").toLowerCase().includes(searchTerm)
     );
     renderCampaigns(filtered);
 }
 
-// ================= LOAD CAMPAIGNS =================
+// ================= SECTION 6: LOAD CAMPAIGNS =================
 async function loadCampaigns() {
     try {
         const response = await fetch(`${API_URL}/campaigns`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
         allCampaigns = data.campaigns || [];
         renderCampaigns(allCampaigns);
         
         const totalQuestions = allCampaigns.reduce((sum, c) => sum + (c.questions || 0), 0);
-        document.getElementById("totalQuestions").innerText = totalQuestions;
+        const totalQuestionsEl = document.getElementById("totalQuestions");
+        if (totalQuestionsEl) {
+            totalQuestionsEl.innerText = totalQuestions;
+        }
+        
     } catch (error) {
         console.error("Error loading campaigns:", error);
         showToast("Failed to load chats", "error");
+        renderCampaigns([]);
     }
 }
 
@@ -115,7 +182,7 @@ function renderCampaigns(campaigns) {
     
     list.innerHTML = "";
     
-    if (campaigns.length === 0) {
+    if (!campaigns || campaigns.length === 0) {
         list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p><p style="font-size:12px">Start a new chat!</p></div>';
         return;
     }
@@ -146,11 +213,14 @@ function renderCampaigns(campaigns) {
     });
 }
 
-// ================= NEW CHAT =================
+// ================= SECTION 7: NEW CHAT =================
 function newChat() {
     currentCampaign = null;
     currentMessages = [];
-    document.getElementById("history_result").innerHTML = "";
+    
+    const chatArea = document.getElementById("history_result");
+    if (chatArea) chatArea.innerHTML = "";
+    
     showWelcomeMessage();
     updateChatTitle("New Conversation");
     closeSidebar();
@@ -163,15 +233,21 @@ function removeActiveClass() {
     });
 }
 
-// ================= OPEN CHAT =================
+// ================= SECTION 8: OPEN CHAT =================
 async function openCampaign(id, element) {
     try {
         showToast("Loading chat...", "info");
         currentCampaign = id;
+        
         document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
         if (element) element.classList.add("active");
         
         const response = await fetch(`${API_URL}/campaign/${id}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.conversation) {
@@ -181,18 +257,22 @@ async function openCampaign(id, element) {
         }
         
         closeSidebar();
+        
     } catch (error) {
         console.error("Error opening chat:", error);
         showToast("Failed to open chat", "error");
     }
 }
 
-// ================= SEND CHAT =================
+// ================= SECTION 9: SEND CHAT =================
 async function sendChat() {
     const input = document.getElementById("chat_input");
+    if (!input) return;
+    
     const message = input.value.trim();
     
     if (!message) return;
+    
     if (message.length > 4000) {
         showToast("Message too long (max 4000 characters)", "error");
         return;
@@ -216,6 +296,10 @@ async function sendChat() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
         });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         
         const data = await response.json();
         
@@ -245,7 +329,7 @@ async function sendChat() {
     }
 }
 
-// ================= RENDER CHAT =================
+// ================= SECTION 10: RENDER CHAT =================
 function renderChat(conversation) {
     const box = document.getElementById("history_result");
     if (!box) return;
@@ -279,6 +363,8 @@ function appendMessage(role, content) {
 
 function appendMessageToContainer(role, content) {
     const box = document.getElementById("history_result");
+    if (!box) return;
+    
     const messageDiv = document.createElement("div");
     messageDiv.className = `message ${role === "user" ? "user" : "ai"}`;
     
@@ -290,7 +376,7 @@ function appendMessageToContainer(role, content) {
     contentDiv.className = "message-content";
     contentDiv.innerHTML = formatMessage(content);
     
-    // Apply syntax highlighting for code blocks
+    // Apply syntax highlighting
     contentDiv.querySelectorAll('pre code').forEach((block) => {
         if (typeof hljs !== 'undefined') {
             hljs.highlightElement(block);
@@ -299,29 +385,26 @@ function appendMessageToContainer(role, content) {
     
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(contentDiv);
-    
     box.appendChild(messageDiv);
 }
 
-// ================= 🔥 FIXED FORMATTER - BLOG LINKS ALWAYS CLICKABLE =================
+// ================= SECTION 11: MESSAGE FORMATTER =================
 function formatMessage(content) {
     if (!content) return "";
     
     let formatted = content;
     
-    // 🔥 CRITICAL FIX: Check if content already has blog card or link
-    // Agar already formatted hai toh dobara format mat karo
+    // Check if already formatted (avoid double formatting)
     const hasBlogCard = formatted.includes('class="blog-card"');
     const hasBlogBtn = formatted.includes('class="blog-btn"');
     const hasBlogPublished = formatted.includes('blog-published');
     const hasAnchor = formatted.includes('<a href') && formatted.includes('target="_blank"');
     
-    // Agar already formatted hai, waisa ka waisa return karo
     if (hasBlogCard || hasBlogBtn || hasBlogPublished || hasAnchor) {
         return formatted;
     }
     
-    // Step 1: Convert blog URLs to beautiful cards
+    // Convert blog URLs to cards
     const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
     formatted = formatted.replace(blogRegex, (url) => {
         return `<div class="blog-card">
@@ -332,14 +415,13 @@ function formatMessage(content) {
                 </div>`;
     });
     
-    // Step 2: Convert other URLs to simple clickable links (skip if already handled)
+    // Convert other URLs to links
     const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
     formatted = formatted.replace(urlRegex, (url) => {
-        if (url.includes('/blog/')) return url; // already handled
+        if (url.includes('/blog/')) return url;
         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link">🔗 ${url}</a>`;
     });
     
-    // Step 3: Markdown / code formatting
     // Code blocks
     formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
@@ -365,12 +447,14 @@ function formatMessage(content) {
     return formatted;
 }
 
-// ================= TYPING INDICATOR =================
+// ================= SECTION 12: TYPING INDICATOR =================
 function showTypingIndicator() {
     if (isTyping) return;
     isTyping = true;
     
     const box = document.getElementById("history_result");
+    if (!box) return;
+    
     const indicator = document.createElement("div");
     indicator.className = "message ai typing-message";
     indicator.id = "typingIndicator";
@@ -397,12 +481,13 @@ function hideTypingIndicator() {
     }
 }
 
-// ================= DELETE CHAT =================
+// ================= SECTION 13: CHAT MANAGEMENT =================
 async function deleteChat(id) {
     if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
     
     try {
         const response = await fetch(`${API_URL}/campaign/delete/${id}`, { method: "DELETE" });
+        
         if (response.ok) {
             await loadCampaigns();
             if (currentCampaign === id) {
@@ -418,7 +503,6 @@ async function deleteChat(id) {
     }
 }
 
-// ================= RENAME CHAT =================
 async function renameChat(id) {
     const newName = prompt("Enter new chat name:", "Chat");
     if (!newName || newName.trim() === "") return;
@@ -445,7 +529,6 @@ async function renameChat(id) {
     }
 }
 
-// ================= CLEAR ALL CHATS =================
 async function clearAllChats() {
     if (!confirm("⚠️ This will delete ALL chats. This action cannot be undone. Continue?")) return;
     
@@ -462,7 +545,6 @@ async function clearAllChats() {
     }
 }
 
-// ================= EXPORT CHAT =================
 function exportChat() {
     if (!currentMessages || currentMessages.length === 0) {
         showToast("No messages to export", "error");
@@ -470,7 +552,7 @@ function exportChat() {
     }
     
     const exportData = {
-        title: document.getElementById("chatTitle").innerText,
+        title: document.getElementById("chatTitle")?.innerText || "Chat",
         date: new Date().toISOString(),
         messages: currentMessages
     };
@@ -485,7 +567,6 @@ function exportChat() {
     showToast("Chat exported successfully", "success");
 }
 
-// ================= CLEAR CURRENT CHAT =================
 function clearCurrentChat() {
     if (!currentMessages || currentMessages.length === 0) {
         showToast("No messages to clear", "error");
@@ -500,7 +581,7 @@ function clearCurrentChat() {
     }
 }
 
-// ================= VOICE INPUT =================
+// ================= SECTION 14: VOICE INPUT =================
 function startVoice() {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         showToast("Your browser does not support voice input", "error");
@@ -517,36 +598,41 @@ function startVoice() {
     
     recognition.onstart = () => {
         showToast("🎤 Listening... Speak now", "success");
-        voiceBtn.classList.add("active");
+        if (voiceBtn) voiceBtn.classList.add("active");
     };
     
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        document.getElementById("chat_input").value = transcript;
-        updateCharCount();
-        sendChat();
+        const input = document.getElementById("chat_input");
+        if (input) {
+            input.value = transcript;
+            updateCharCount();
+            sendChat();
+        }
     };
     
     recognition.onerror = () => {
         showToast("Voice recognition failed", "error");
-        voiceBtn.classList.remove("active");
+        if (voiceBtn) voiceBtn.classList.remove("active");
     };
     
     recognition.onend = () => {
-        voiceBtn.classList.remove("active");
+        if (voiceBtn) voiceBtn.classList.remove("active");
     };
     
     recognition.start();
 }
 
-// ================= SET COMMAND =================
+// ================= SECTION 15: COMMAND & STATS =================
 function setCommand(command) {
-    document.getElementById("chat_input").value = command;
-    updateCharCount();
-    sendChat();
+    const input = document.getElementById("chat_input");
+    if (input) {
+        input.value = command;
+        updateCharCount();
+        sendChat();
+    }
 }
 
-// ================= STATS =================
 function showStats() {
     const totalMessages = currentMessages.length;
     const userMessages = currentMessages.filter(m => m.role === "user").length;
@@ -554,17 +640,23 @@ function showStats() {
     const questions = currentMessages.filter(m => m.role === "user" && 
         (m.content.includes("?") || /(kya|kaise|kyu|kahan)/i.test(m.content))).length;
     
-    document.getElementById("statTotalMessages").innerText = totalMessages;
-    document.getElementById("statTotalQuestions").innerText = questions;
-    document.getElementById("statAiMessages").innerText = aiMessages;
-    document.getElementById("statsModal").style.display = "flex";
+    const statTotal = document.getElementById("statTotalMessages");
+    const statQuestions = document.getElementById("statTotalQuestions");
+    const statAi = document.getElementById("statAiMessages");
+    const modal = document.getElementById("statsModal");
+    
+    if (statTotal) statTotal.innerText = totalMessages;
+    if (statQuestions) statQuestions.innerText = questions;
+    if (statAi) statAi.innerText = aiMessages;
+    if (modal) modal.style.display = "flex";
 }
 
 function closeStats() {
-    document.getElementById("statsModal").style.display = "none";
+    const modal = document.getElementById("statsModal");
+    if (modal) modal.style.display = "none";
 }
 
-// ================= HELPER FUNCTIONS =================
+// ================= SECTION 16: HELPER FUNCTIONS =================
 function showWelcomeMessage() {
     const box = document.getElementById("history_result");
     if (!box) return;
@@ -590,7 +682,9 @@ function showWelcomeMessage() {
 
 function updateChatTitle(title) {
     const titleElement = document.getElementById("chatTitle");
-    if (titleElement) titleElement.textContent = title;
+    if (titleElement) {
+        titleElement.textContent = title;
+    }
 }
 
 function getChatTitle(conversation) {
@@ -606,7 +700,9 @@ function getChatTitle(conversation) {
 function scrollToBottom() {
     setTimeout(() => {
         const box = document.getElementById("history_result");
-        if (box) box.scrollTop = box.scrollHeight;
+        if (box) {
+            box.scrollTop = box.scrollHeight;
+        }
     }, 100);
 }
 
@@ -630,18 +726,20 @@ function showToast(message, type = "info") {
     }, 3000);
 }
 
-// ================= CLICK OUTSIDE =================
+// ================= SECTION 17: CLICK OUTSIDE HANDLER =================
 document.addEventListener("click", (e) => {
+    // Sidebar close on outside click (mobile)
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         const menuToggle = document.getElementById("menuToggle");
         if (sidebar && sidebar.classList.contains("open")) {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+            if (!sidebar.contains(e.target) && !menuToggle?.contains(e.target)) {
                 sidebar.classList.remove("open");
             }
         }
     }
     
+    // Modal close on outside click
     const modal = document.getElementById("statsModal");
     if (modal && modal.style.display === "flex") {
         if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
@@ -649,3 +747,6 @@ document.addEventListener("click", (e) => {
         }
     }
 });
+
+// ================= SECTION 18: EXPORTS (if needed) =================
+// Functions are globally available via window object
