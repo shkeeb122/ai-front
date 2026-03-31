@@ -1,8 +1,8 @@
 // ====================================================================
 // 📁 FILE: script.js
 // 🎯 ROLE: FRONTEND LOGIC - User interaction, API calls, UI updates
-// 📋 TOTAL FUNCTIONS: 30+
-// 📋 TOTAL SECTIONS: 15
+// 📋 TOTAL SECTIONS: 17
+// 🔧 FIXES: Search bar click issue fixed, blog links fixed
 // ====================================================================
 
 // ================= SECTION 1: CONFIGURATION =================
@@ -40,6 +40,14 @@ function setupEventListeners() {
     });
     
     sendBtn.addEventListener("click", () => sendChat());
+    
+    // 🔥 FIX: Prevent click bubbling on search box
+    const searchBox = document.getElementById("search_history_box");
+    if (searchBox) {
+        searchBox.addEventListener("click", function(e) {
+            e.stopPropagation();
+        });
+    }
 }
 
 // ================= SECTION 4: AUTO RESIZE TEXTAREA =================
@@ -84,11 +92,18 @@ function toggleSearch() {
     const searchBox = document.getElementById("search_history_box");
     if (searchBox.style.display === "none") {
         searchBox.style.display = "block";
+        document.getElementById("history_search").focus();
     } else {
         searchBox.style.display = "none";
         document.getElementById("history_search").value = "";
         renderCampaigns(allCampaigns);
     }
+}
+
+function clearSearch() {
+    document.getElementById("history_search").value = "";
+    renderCampaigns(allCampaigns);
+    toggleSearch();
 }
 
 function searchHistory() {
@@ -627,8 +642,9 @@ function showToast(message, type = "info") {
     }, 3000);
 }
 
-// ================= SECTION 17: CLICK OUTSIDE =================
+// ================= SECTION 17: CLICK OUTSIDE (FIXED) =================
 document.addEventListener("click", (e) => {
+    // Sidebar close on outside click (mobile)
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         const menuToggle = document.getElementById("menuToggle");
@@ -639,6 +655,7 @@ document.addEventListener("click", (e) => {
         }
     }
     
+    // Modal close on outside click
     const modal = document.getElementById("statsModal");
     if (modal && modal.style.display === "flex") {
         if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
