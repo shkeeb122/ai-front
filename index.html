@@ -2,106 +2,164 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Ultimate Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Ultimate Pro – Smart Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 </head>
 <body>
 
-<!-- ================= SECTION 1: APP CONTAINER ================= -->
-<div class="app">
+<!-- ==================================================================== -->
+<!-- 📁 FILE: index.html                                                  -->
+<!-- 🎯 ROLE: FRONTEND STRUCTURE - User interface layout                  -->
+<!-- 📋 TOTAL SECTIONS: 6                                                -->
+<!-- ==================================================================== -->
 
-    <!-- ================= SECTION 2: SIDEBAR (Chat History) ================= -->
+<div class="app">
+    
+    <!-- ================= SECTION 1: SIDEBAR (Chat History) ================= -->
     <aside class="sidebar" id="sidebar">
-        <!-- 2.1 Sidebar Header -->
+        <!-- 1.1 Sidebar Header with Logo & New Chat -->
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-brain"></i>
                 <h2>AI Ultimate Pro</h2>
             </div>
             <button class="new-chat-btn" onclick="newChat()">
-                <i class="fas fa-plus"></i> New Chat
+                <i class="fas fa-plus"></i>
+                <span>New Chat</span>
             </button>
         </div>
         
-        <!-- 2.2 Chat History List -->
+        <!-- 1.2 Chat History Section -->
         <div class="history-section">
             <div class="history-header">
                 <i class="fas fa-history"></i>
                 <span>Chat History</span>
-                <button class="clear-all-btn" onclick="clearAllChats()" title="Clear All">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                <div class="history-actions">
+                    <button class="search-history-btn" onclick="toggleSearch()" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="clear-all-btn" onclick="clearAllChats()" title="Clear All">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="search_history_box" class="search-box" style="display: none;">
+                <input type="text" id="history_search" placeholder="🔍 Search chats by name..." onkeyup="searchHistory()">
             </div>
             <div id="campaign_list" class="history-list"></div>
         </div>
         
-        <!-- 2.3 Sidebar Footer -->
+        <!-- 1.3 Sidebar Footer -->
         <div class="sidebar-footer">
             <div class="user-info">
                 <i class="fas fa-user-circle"></i>
                 <span>Guest User</span>
             </div>
-            <div class="stats-badge" onclick="showStats()">
+            <div class="stats-badge" id="statsBadge" onclick="showStats()">
                 <i class="fas fa-chart-line"></i>
                 <span id="totalQuestions">0</span>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>Online</span>
             </div>
         </div>
     </aside>
 
-    <!-- ================= SECTION 3: MAIN CHAT AREA ================= -->
+    <!-- ================= SECTION 2: MAIN CHAT AREA ================= -->
     <main class="chat-container">
         
-        <!-- 3.1 Chat Header -->
+        <!-- 2.1 Chat Header -->
         <div class="chat-header">
-            <button class="menu-toggle" onclick="toggleSidebar()">
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">
                 <i class="fas fa-bars"></i>
             </button>
             <div class="chat-info">
                 <i class="fas fa-comment-dots"></i>
                 <span id="chatTitle">New Conversation</span>
             </div>
-            <button class="action-btn" onclick="exportChat()">
-                <i class="fas fa-download"></i>
-            </button>
+            <div class="chat-actions">
+                <button class="action-btn" onclick="exportChat()" title="Export Chat">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="action-btn" onclick="clearCurrentChat()" title="Clear Chat">
+                    <i class="fas fa-eraser"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- 3.2 Messages Area -->
+        <!-- 2.2 Messages Display Area -->
         <div id="history_result" class="chat-area"></div>
 
-        <!-- 3.3 Input Area -->
+        <!-- 2.3 Input Area -->
         <div class="chat-input-container">
-            <div class="suggestions-bar">
-                <button class="suggestion-chip" onclick="setCommand('Blog banao')">📝 Blog banao</button>
+            <div class="suggestions-bar" id="suggestionsBar">
                 <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
                 <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
                 <button class="suggestion-chip" onclick="setCommand('Aur batao')">💬 Aur batao</button>
+                <button class="suggestion-chip" onclick="setCommand('Blog banao car ke baare mein')">📝 Blog banao</button>
             </div>
             <div class="input-wrapper">
-                <textarea id="chat_input" placeholder="Type your message..." rows="1"></textarea>
-                <button onclick="sendChat()" class="send-btn">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+                <textarea 
+                    id="chat_input" 
+                    placeholder="Type your message here... (Press Enter to send)" 
+                    rows="1"
+                    maxlength="4000"
+                ></textarea>
+                <div class="input-actions">
+                    <button id="voiceBtn" onclick="startVoice()" class="voice-btn" title="Voice Input">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button onclick="sendChat()" class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="input-footer">
+                <span class="char-counter">0 / 4000</span>
+                <span class="info-text"><i class="fas fa-keyboard"></i> Shift + Enter for new line</span>
             </div>
         </div>
     </main>
 </div>
 
-<!-- ================= SECTION 4: MODALS ================= -->
+<!-- ================= SECTION 3: STATS MODAL ================= -->
 <div id="statsModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Statistics</h3>
+            <h3><i class="fas fa-chart-line"></i> Chat Statistics</h3>
             <button class="modal-close" onclick="closeStats()">&times;</button>
         </div>
-        <div class="modal-body">
-            <p>Total Messages: <span id="statTotalMessages">0</span></p>
-            <p>Total Questions: <span id="statTotalQuestions">0</span></p>
+        <div class="modal-body" id="statsContent">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalMessages">0</span>
+                    <span class="stat-label">Total Messages</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statTotalQuestions">0</span>
+                    <span class="stat-label">Total Questions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-robot"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statAiMessages">0</span>
+                    <span class="stat-label">AI Responses</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="script.js"></script>
 </body>
-</html>
+                    </html>
