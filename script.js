@@ -1,11 +1,5 @@
-// ====================================================================
-// 📁 FILE: script.js
-// 🎯 ROLE: FRONTEND LOGIC - User interaction, API calls, UI updates
-// 📋 TOTAL SECTIONS: 17
-// 🔧 FIXES: Search bar click issue fixed, blog links fixed
-// ====================================================================
 
-// ================= SECTION 1: CONFIGURATION =================
+// ================= CONFIGURATION =================
 const API_URL = "https://umar-k20u.onrender.com";
 let currentCampaign = null;
 let recognition = null;
@@ -13,7 +7,7 @@ let isTyping = false;
 let currentMessages = [];
 let allCampaigns = [];
 
-// ================= SECTION 2: INITIALIZATION =================
+// ================= INITIALIZATION =================
 window.onload = () => {
     loadCampaigns();
     setupEventListeners();
@@ -22,7 +16,7 @@ window.onload = () => {
     showWelcomeMessage();
 };
 
-// ================= SECTION 3: EVENT LISTENERS =================
+// ================= EVENT LISTENERS =================
 function setupEventListeners() {
     const textarea = document.getElementById("chat_input");
     const sendBtn = document.getElementById("sendBtn");
@@ -40,17 +34,9 @@ function setupEventListeners() {
     });
     
     sendBtn.addEventListener("click", () => sendChat());
-    
-    // 🔥 FIX: Prevent click bubbling on search box
-    const searchBox = document.getElementById("search_history_box");
-    if (searchBox) {
-        searchBox.addEventListener("click", function(e) {
-            e.stopPropagation();
-        });
-    }
 }
 
-// ================= SECTION 4: AUTO RESIZE TEXTAREA =================
+// ================= AUTO RESIZE TEXTAREA =================
 function setupAutoResize() {
     const textarea = document.getElementById("chat_input");
     textarea.addEventListener("input", autoResizeTextarea);
@@ -75,7 +61,7 @@ function updateCharCount() {
     }
 }
 
-// ================= SECTION 5: SIDEBAR FUNCTIONS =================
+// ================= SIDEBAR FUNCTIONS =================
 function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("open");
@@ -92,18 +78,11 @@ function toggleSearch() {
     const searchBox = document.getElementById("search_history_box");
     if (searchBox.style.display === "none") {
         searchBox.style.display = "block";
-        document.getElementById("history_search").focus();
     } else {
         searchBox.style.display = "none";
         document.getElementById("history_search").value = "";
         renderCampaigns(allCampaigns);
     }
-}
-
-function clearSearch() {
-    document.getElementById("history_search").value = "";
-    renderCampaigns(allCampaigns);
-    toggleSearch();
 }
 
 function searchHistory() {
@@ -114,7 +93,7 @@ function searchHistory() {
     renderCampaigns(filtered);
 }
 
-// ================= SECTION 6: LOAD CAMPAIGNS =================
+// ================= LOAD CAMPAIGNS =================
 async function loadCampaigns() {
     try {
         const response = await fetch(`${API_URL}/campaigns`);
@@ -167,7 +146,7 @@ function renderCampaigns(campaigns) {
     });
 }
 
-// ================= SECTION 7: NEW CHAT =================
+// ================= NEW CHAT =================
 function newChat() {
     currentCampaign = null;
     currentMessages = [];
@@ -184,7 +163,7 @@ function removeActiveClass() {
     });
 }
 
-// ================= SECTION 8: OPEN CHAT =================
+// ================= OPEN CHAT =================
 async function openCampaign(id, element) {
     try {
         showToast("Loading chat...", "info");
@@ -208,7 +187,7 @@ async function openCampaign(id, element) {
     }
 }
 
-// ================= SECTION 9: SEND CHAT =================
+// ================= SEND CHAT =================
 async function sendChat() {
     const input = document.getElementById("chat_input");
     const message = input.value.trim();
@@ -266,7 +245,7 @@ async function sendChat() {
     }
 }
 
-// ================= SECTION 10: RENDER CHAT =================
+// ================= RENDER CHAT =================
 function renderChat(conversation) {
     const box = document.getElementById("history_result");
     if (!box) return;
@@ -311,6 +290,7 @@ function appendMessageToContainer(role, content) {
     contentDiv.className = "message-content";
     contentDiv.innerHTML = formatMessage(content);
     
+    // Apply syntax highlighting for code blocks
     contentDiv.querySelectorAll('pre code').forEach((block) => {
         if (typeof hljs !== 'undefined') {
             hljs.highlightElement(block);
@@ -323,23 +303,25 @@ function appendMessageToContainer(role, content) {
     box.appendChild(messageDiv);
 }
 
-// ================= SECTION 11: MESSAGE FORMATTER (FIXED) =================
+// ================= 🔥 FIXED FORMATTER - BLOG LINKS ALWAYS CLICKABLE =================
 function formatMessage(content) {
     if (!content) return "";
     
     let formatted = content;
     
-    // Check if already formatted (to avoid double formatting)
+    // 🔥 CRITICAL FIX: Check if content already has blog card or link
+    // Agar already formatted hai toh dobara format mat karo
     const hasBlogCard = formatted.includes('class="blog-card"');
     const hasBlogBtn = formatted.includes('class="blog-btn"');
     const hasBlogPublished = formatted.includes('blog-published');
     const hasAnchor = formatted.includes('<a href') && formatted.includes('target="_blank"');
     
+    // Agar already formatted hai, waisa ka waisa return karo
     if (hasBlogCard || hasBlogBtn || hasBlogPublished || hasAnchor) {
         return formatted;
     }
     
-    // Convert blog URLs to cards
+    // Step 1: Convert blog URLs to beautiful cards
     const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
     formatted = formatted.replace(blogRegex, (url) => {
         return `<div class="blog-card">
@@ -350,13 +332,14 @@ function formatMessage(content) {
                 </div>`;
     });
     
-    // Convert other URLs to links
+    // Step 2: Convert other URLs to simple clickable links (skip if already handled)
     const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
     formatted = formatted.replace(urlRegex, (url) => {
-        if (url.includes('/blog/')) return url;
+        if (url.includes('/blog/')) return url; // already handled
         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link">🔗 ${url}</a>`;
     });
     
+    // Step 3: Markdown / code formatting
     // Code blocks
     formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
         return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
@@ -382,7 +365,7 @@ function formatMessage(content) {
     return formatted;
 }
 
-// ================= SECTION 12: TYPING INDICATOR =================
+// ================= TYPING INDICATOR =================
 function showTypingIndicator() {
     if (isTyping) return;
     isTyping = true;
@@ -414,7 +397,7 @@ function hideTypingIndicator() {
     }
 }
 
-// ================= SECTION 13: CHAT MANAGEMENT =================
+// ================= DELETE CHAT =================
 async function deleteChat(id) {
     if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
     
@@ -435,6 +418,7 @@ async function deleteChat(id) {
     }
 }
 
+// ================= RENAME CHAT =================
 async function renameChat(id) {
     const newName = prompt("Enter new chat name:", "Chat");
     if (!newName || newName.trim() === "") return;
@@ -461,6 +445,7 @@ async function renameChat(id) {
     }
 }
 
+// ================= CLEAR ALL CHATS =================
 async function clearAllChats() {
     if (!confirm("⚠️ This will delete ALL chats. This action cannot be undone. Continue?")) return;
     
@@ -477,6 +462,7 @@ async function clearAllChats() {
     }
 }
 
+// ================= EXPORT CHAT =================
 function exportChat() {
     if (!currentMessages || currentMessages.length === 0) {
         showToast("No messages to export", "error");
@@ -499,6 +485,7 @@ function exportChat() {
     showToast("Chat exported successfully", "success");
 }
 
+// ================= CLEAR CURRENT CHAT =================
 function clearCurrentChat() {
     if (!currentMessages || currentMessages.length === 0) {
         showToast("No messages to clear", "error");
@@ -513,7 +500,7 @@ function clearCurrentChat() {
     }
 }
 
-// ================= SECTION 14: VOICE INPUT =================
+// ================= VOICE INPUT =================
 function startVoice() {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         showToast("Your browser does not support voice input", "error");
@@ -552,13 +539,14 @@ function startVoice() {
     recognition.start();
 }
 
-// ================= SECTION 15: COMMAND & STATS =================
+// ================= SET COMMAND =================
 function setCommand(command) {
     document.getElementById("chat_input").value = command;
     updateCharCount();
     sendChat();
 }
 
+// ================= STATS =================
 function showStats() {
     const totalMessages = currentMessages.length;
     const userMessages = currentMessages.filter(m => m.role === "user").length;
@@ -576,7 +564,7 @@ function closeStats() {
     document.getElementById("statsModal").style.display = "none";
 }
 
-// ================= SECTION 16: HELPER FUNCTIONS =================
+// ================= HELPER FUNCTIONS =================
 function showWelcomeMessage() {
     const box = document.getElementById("history_result");
     if (!box) return;
@@ -642,9 +630,8 @@ function showToast(message, type = "info") {
     }, 3000);
 }
 
-// ================= SECTION 17: CLICK OUTSIDE (FIXED) =================
+// ================= CLICK OUTSIDE =================
 document.addEventListener("click", (e) => {
-    // Sidebar close on outside click (mobile)
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
         const menuToggle = document.getElementById("menuToggle");
@@ -655,7 +642,6 @@ document.addEventListener("click", (e) => {
         }
     }
     
-    // Modal close on outside click
     const modal = document.getElementById("statsModal");
     if (modal && modal.style.display === "flex") {
         if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
