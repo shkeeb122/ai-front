@@ -750,3 +750,239 @@ document.addEventListener("click", (e) => {
 
 // ================= SECTION 18: EXPORTS (if needed) =================
 // Functions are globally available via window object
+
+
+
+// ====================================================================
+// SECTION 19: HEALTH SERVICE FUNCTIONS (NEW)
+// ====================================================================
+
+// Health Service Variables
+let healthCheckInterval = null;
+let currentHealthStatus = 'healthy';
+
+function addHealthIndicator() {
+    const sidebarFooter = document.querySelector('.sidebar-footer');
+    if (!sidebarFooter) return;
+    
+    const healthDiv = document.createElement('div');
+    healthDiv.className = 'health-indicator health-healthy';
+    healthDiv.id = 'healthIndicator';
+    healthDiv.onclick = () => showHealthModal();
+    healthDiv.innerHTML = `
+        <i class="fas fa-heartbeat"></i>
+        <span id="healthStatus">✅ System Healthy</span>
+    `;
+    
+    sidebarFooter.insertBefore(healthDiv, sidebarFooter.firstChild);
+}
+
+function startHealthCheckInterval() {
+    if (healthCheckInterval) clearInterval(healthCheckInterval);
+    checkSystemHealth();
+    healthCheckInterval = setInterval(checkSystemHealth, 30000);
+}
+
+async function checkSystemHealth() {
+    try {
+        const response = await fetch(`${API_URL}/health/quick`);
+        if (!response.ok) throw new Error('Health check failed');
+        
+        const data = await response.json();
+        currentHealthStatus = data.status;
+        updateHealthIndicator(data);
+    } catch (error) {
+        console.error('Health check error:', error);
+        updateHealthIndicator({ status: 'error', emoji: '❌', critical: 0 });
+    }
+}
+
+function updateHealthIndicator(data) {
+    const indicator = document.getElementById('healthIndicator');
+    const statusSpan = document.getElementById('healthStatus');
+    if (!indicator || !statusSpan) return;
+    
+    indicator.className = `health-indicator health-${data.status}`;
+    
+    const messages = {
+        'healthy': '✅ System Healthy',
+        'warning': `⚠️ ${data.critical || 0} Warnings`,
+        'critical': `🔴 ${data.critical || 0} Critical`,
+        'error': '❌ Offline'
+    };
+    
+    statusSpan.textContent = messages[data.status] || '❓ Unknown';
+}
+
+async function showHealthModal() {
+    showToast('Loading health report...', 'info');
+    
+    try {
+        const response = await fetch(`${API_URL}/health/full`);
+        if (!response.ok) throw new Error('Failed to load report');
+        
+        const report = await response.json();
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'healthModal';
+        modal.style.display = 'flex';
+        
+        let criticalHtml = '';
+        report.problems.critical.slice(0, 5).forEach(p => {
+            criticalHtml += `
+                <div class="health-problem critical">
+                    <div class="problem-location"><i class="fas fa-times-circle"></i> ${p.location}</div>
+                    <div class="problem-issue">${p.issue}</div>
+                    ${p.fix ? `<div class="problem-fix">💡 ${p.fix}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        let warningsHtml = '';
+        report.problems.warnings.slice(0, 5).forEach(p => {
+            warningsHtml += `
+                <div class="health-problem warning">
+                    <div class="problem-location"><i class="fas fa-exclamation-triangle"></i> ${p.location}</div>
+                    <div class="problem-issue">${p.issue}</div>
+                    ${p.fix ? `<div class="problem-fix">💡 ${p.fix}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        modal.innerHTML = `
+            <div class="modal-content health-modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-heartbeat"></i> System Health Report</h3>
+                    <button class="modal-close" onclick="closeHealthModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="health-overall ${report.overall_status}">
+                        <span class="health-emoji">${report.overall_emoji}</span>
+                        <span class="health-status">${report.overall}</span>
+                    </div>
+                    
+                    <div class="health-summary">
+                        <div class="summary-card">
+                            <span class="summary-value">${report.stats.files}</span>
+                            <span class="summary-label">Files</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-value">${report.stats.functions}</span>
+                            <span class="summary-label">Functions</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-value">${report.stats.tables}</span>
+                            <span class="summary-label">Tables</span>
+                        </div>
+                        <div class="summary-card">
+                            <span class="summary-value">${report.stats.columns}</span>
+                            <span class="summary-label">Columns</span>
+                        </div>
+                    </div>
+                    
+                    ${report.stats.critical > 0 ? `
+                    <div class="health-section">
+                        <h4><i class="fas fa-times-circle" style="color: #ef4444;"></i> Critical Issues (${report.stats.critical})</h4>
+                        ${criticalHtml || '<p class="no-issues">No critical issues</p>'}
+                    </div>
+                    ` : ''}
+                    
+                    ${report.stats.warnings > 0 ? `
+                    <div class="health-section">
+                        <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Warnings (${report.stats.warnings})</h4>
+                        ${warningsHtml || '<p class="no-issues">No warnings</p>'}
+                    </div>
+                    ` : ''}
+                    
+                    ${report.stats.critical === 0 && report.stats.warnings === 0 ? `
+                    <div class="health-section">
+                        <p class="all-good"><i class="fas fa-check-circle" style="color: #10b981;"></i> All systems operational!</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="health-discovered">
+                        <p><strong>📁 Files:</strong> ${report.discovered.files.slice(0, 6).join(', ')}${report.discovered.files.length > 6 ? '...' : ''}</p>
+                        <p><strong>🗄️ Tables:</strong> ${report.discovered.tables.join(', ')}</p>
+                    </div>
+                    
+                    <div class="health-actions">
+                        <button class="health-btn primary" onclick="runAutoFix()">
+                            <i class="fas fa-wrench"></i> Auto-Fix Issues
+                        </button>
+                        <button class="health-btn secondary" onclick="refreshHealthModal()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    
+                    <p class="health-timestamp">Last checked: ${new Date(report.timestamp).toLocaleString()}</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+    } catch (error) {
+        console.error('Health modal error:', error);
+        showToast('Failed to load health report', 'error');
+    }
+}
+
+function closeHealthModal() {
+    const modal = document.getElementById('healthModal');
+    if (modal) modal.remove();
+}
+
+async function refreshHealthModal() {
+    closeHealthModal();
+    await checkSystemHealth();
+    showHealthModal();
+}
+
+async function runAutoFix() {
+    showToast('Running auto-fix...', 'info');
+    
+    try {
+        const response = await fetch(`${API_URL}/health/fix`, { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.fixes && data.fixes.length > 0) {
+            let fixMsg = '';
+            data.fixes.slice(0, 3).forEach(f => { fixMsg += f + ' '; });
+            showToast(`✅ ${fixMsg}`, 'success');
+        } else {
+            showToast('✅ No issues to fix', 'success');
+        }
+        
+        setTimeout(() => {
+            closeHealthModal();
+            checkSystemHealth();
+        }, 1500);
+        
+    } catch (error) {
+        showToast('❌ Auto-fix failed', 'error');
+    }
+}
+
+// Initialize health check on page load
+(function initHealthCheck() {
+    setTimeout(() => {
+        addHealthIndicator();
+        startHealthCheckInterval();
+    }, 1000);
+})();
+
+// Patch click handler for health modal
+document.addEventListener('click', function(e) {
+    const healthModal = document.getElementById('healthModal');
+    if (healthModal && healthModal.style.display === 'flex') {
+        const modalContent = healthModal.querySelector('.modal-content');
+        const closeBtn = healthModal.querySelector('.modal-close');
+        
+        if (closeBtn && (e.target === closeBtn || closeBtn.contains(e.target))) {
+            closeHealthModal();
+        } else if (modalContent && !modalContent.contains(e.target)) {
+            closeHealthModal();
+        }
+    }
+});
