@@ -812,7 +812,14 @@ function updateHealthIndicator(data) {
         'critical': `🔴 ${data.critical || 0} Critical`,
         'error': '❌ Offline'
     };
-    
+  // ================= MOBILE INDICATOR UPDATE (NEW) =================
+const mobileIndicator = document.getElementById('mobileHealthIndicator');
+const mobileStatus = document.getElementById('mobileHealthStatus');
+if (mobileIndicator && mobileStatus) {
+    mobileIndicator.className = `mobile-health-indicator health-${data.status}`;
+    const short = { 'healthy':'✅', 'warning':`⚠️${data.critical||''}`, 'critical':`🔴${data.critical||''}`, 'error':'❌' };
+    mobileStatus.textContent = short[data.status] || '🏥';
+}  
     statusSpan.textContent = messages[data.status] || '❓ Unknown';
 }
 
