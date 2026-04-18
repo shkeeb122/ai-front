@@ -1401,3 +1401,62 @@ textarea::placeholder {
         margin: 0;
     }
 }
+
+
+/* ====================================================================
+   SECTION 17: MOBILE HEALTH INDICATOR (NEW)
+   ==================================================================== */
+
+/* Mobile Health Indicator in Top Bar */
+.mobile-health-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-right: 8px;
+    transition: all 0.2s;
+}
+
+.mobile-health-indicator i {
+    font-size: 12px;
+}
+
+.mobile-health-indicator.health-healthy {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.mobile-health-indicator.health-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.mobile-health-indicator.health-critical {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.mobile-health-indicator.health-error {
+    background: rgba(220, 38, 38, 0.15);
+    color: #dc2626;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+/* Desktop: Hide | Mobile: Show */
+@media (min-width: 769px) {
+    .mobile-health-indicator {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .mobile-health-indicator {
+        display: flex !important;
+    }
+}
