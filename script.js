@@ -773,7 +773,9 @@ function addHealthIndicator() {
         <i class="fas fa-heartbeat"></i>
         <span id="healthStatus">✅ System Healthy</span>
     `;
-    
+ // ================= MOBILE INDICATOR (NEW) =================
+const mobileIndicator = document.getElementById('mobileHealthIndicator');
+if (mobileIndicator) mobileIndicator.style.display = window.innerWidth <= 768 ? 'flex' : 'none';   
     sidebarFooter.insertBefore(healthDiv, sidebarFooter.firstChild);
 }
 
