@@ -91,24 +91,10 @@
         <div id="history_result" class="chat-area"></div>
 
         <div class="chat-input-container">
-            <div class="suggestions-bar" id="suggestionsBar">
-                <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
-                <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
-                <button class="suggestion-chip" onclick="setCommand('Aur batao')">💬 Aur batao</button>
-                <button class="suggestion-chip" onclick="setCommand('Blog banao car ke baare mein')">📝 Blog banao</button>
-            </div>
+            <!-- ✅ SUGGESTIONS BAR HATAO -->
+            <!-- ✅ DRAG & DROP ZONE HATAO -->
 
-            <!-- 🔥 NEW: DRAG & DROP ZONE -->
-            <div class="drag-drop-zone" id="dragDropZone">
-                <div class="drag-drop-content">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Drop your image here</p>
-                    <span>or click to browse</span>
-                </div>
-                <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
-            </div>
-
-            <!-- 🔥 NEW: IMAGE PREVIEW -->
+            <!-- IMAGE PREVIEW -->
             <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
                 <div class="image-preview-list" id="imagePreviewList"></div>
                 <div class="image-preview-actions">
@@ -126,10 +112,10 @@
                     maxlength="4000"
                 ></textarea>
                 <div class="input-actions">
-                    <!-- 🔥 NEW: IMAGE BUTTON -->
                     <button id="imageBtn" onclick="document.getElementById('imageInput').click()" class="image-btn" title="Attach Image">
                         <i class="fas fa-image"></i>
                     </button>
+                    <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
                     <button id="voiceBtn" onclick="startVoice()" class="voice-btn" title="Voice Input">
                         <i class="fas fa-microphone"></i>
                     </button>
@@ -180,7 +166,7 @@
     </div>
 </div>
 
-<!-- 🔥 NEW: IMAGE MODAL -->
+<!-- IMAGE MODAL -->
 <div id="imageModal" class="modal image-modal" style="display: none;">
     <div class="image-modal-content">
         <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
@@ -191,4 +177,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="script.js"></script>
 </body>
-                    </html>
+</html>
