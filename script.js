@@ -1,23 +1,22 @@
 // ====================================================================
-// 📁 FILE: script.js
-// 🎯 ROLE: FRONTEND LOGIC - User interaction, API calls, UI updates
-// 📋 TOTAL FUNCTIONS: 30+
-// 📋 TOTAL SECTIONS: 18
-// 🔧 FEATURES: Error handling, organized sections, easy maintenance
+// 📁 FILE: script.js - PRO LEVEL LOGIC
+// 🎯 ROLE: Frontend logic with image support, drag & drop, paste
+// 📋 TOTAL FUNCTIONS: 50+
 // ====================================================================
 
 // ================= SECTION 1: CONFIGURATION =================
-// 1.1 API Configuration
 const API_URL = "https://umar-k20u.onrender.com";
 
-// 1.2 Global Variables
+// ================= SECTION 2: GLOBAL VARIABLES =================
 let currentCampaign = null;
 let recognition = null;
 let isTyping = false;
 let currentMessages = [];
 let allCampaigns = [];
+let selectedImages = [];
+let isSending = false;
 
-// ================= SECTION 2: INITIALIZATION =================
+// ================= SECTION 3: INITIALIZATION =================
 window.onload = () => {
     initializeApp();
 };
@@ -29,6 +28,8 @@ function initializeApp() {
         setupAutoResize();
         updateCharCount();
         showWelcomeMessage();
+        setupDragDrop();
+        setupPasteImage();
         console.log("✅ App initialized successfully");
     } catch (error) {
         console.error("❌ Initialization error:", error);
@@ -36,10 +37,12 @@ function initializeApp() {
     }
 }
 
-// ================= SECTION 3: EVENT LISTENERS =================
+// ================= SECTION 4: EVENT LISTENERS =================
 function setupEventListeners() {
     const textarea = document.getElementById("chat_input");
     const sendBtn = document.getElementById("sendBtn");
+    const imageInput = document.getElementById("imageInput");
+    const imageBtn = document.getElementById("imageBtn");
     
     if (!textarea || !sendBtn) {
         console.error("Required DOM elements not found");
@@ -60,104 +63,396 @@ function setupEventListeners() {
     
     sendBtn.addEventListener("click", () => sendChat());
     
-    // Search box click prevention
-    const searchBox = document.getElementById("search_history_box");
-    if (searchBox) {
-        searchBox.addEventListener("click", function(e) {
-            e.stopPropagation();
+    if (imageInput) {
+        imageInput.addEventListener("change", handleImageUpload);
+    }
+    
+    if (imageBtn) {
+        imageBtn.addEventListener("click", () => {
+            if (imageInput) imageInput.click();
         });
     }
-}
-
-// ================= SECTION 4: AUTO RESIZE TEXTAREA =================
-function setupAutoResize() {
-    const textarea = document.getElementById("chat_input");
-    if (textarea) {
-        textarea.addEventListener("input", autoResizeTextarea);
-    }
-}
-
-function autoResizeTextarea() {
-    const textarea = document.getElementById("chat_input");
-    if (textarea) {
-        textarea.style.height = "auto";
-        textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
-    }
-}
-
-function updateCharCount() {
-    const textarea = document.getElementById("chat_input");
-    const counter = document.querySelector(".char-counter");
     
-    if (textarea && counter) {
-        const count = textarea.value.length;
-        counter.textContent = `${count} / 4000`;
+    // Keyboard shortcuts
+    document.addEventListener("keydown", function(e) {
+        // Ctrl + N = New Chat
+        if (e.ctrlKey && e.key === 'n') {
+            e.preventDefault();
+            newChat();
+        }
+        // Ctrl + I = Image upload
+        if (e.ctrlKey && e.key === 'i') {
+            e.preventDefault();
+            if (imageInput) imageInput.click();
+        }
+    });
+}
+
+// ================= SECTION 5: IMAGE UPLOAD =================
+function handleImageUpload(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    for (const file of files) {
+        // Validate
+        if (!file.type.startsWith('image/')) {
+            showToast(`${file.name} is not an image`, "error");
+            continue;
+        }
         
-        const sendBtn = document.getElementById("sendBtn");
-        if (sendBtn) {
-            sendBtn.disabled = count === 0 || count > 4000;
+        if (file.size > 10 * 1024 * 1024) {
+            showToast(`${file.name} is too large (max 10MB)`, "error");
+            continue;
         }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            selectedImages.push({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: e.target.result.split(',')[1],
+                url: e.target.result
+            });
+            renderImagePreviews();
+            updateImageInfo();
+            document.getElementById('imageBtn').classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
     }
-}
-
-// ================= SECTION 5: SIDEBAR FUNCTIONS =================
-function toggleSidebar() {
-    const sidebar = document.getElementById("sidebar");
-    if (sidebar) {
-        sidebar.classList.toggle("open");
-    }
-}
-
-function closeSidebar() {
-    if (window.innerWidth <= 768) {
-        const sidebar = document.getElementById("sidebar");
-        if (sidebar) {
-            sidebar.classList.remove("open");
-        }
-    }
-}
-
-function toggleSearch() {
-    const searchBox = document.getElementById("search_history_box");
-    const searchInput = document.getElementById("history_search");
     
-    if (searchBox) {
-        if (searchBox.style.display === "none") {
-            searchBox.style.display = "block";
-            if (searchInput) searchInput.focus();
-        } else {
-            searchBox.style.display = "none";
-            if (searchInput) searchInput.value = "";
-            renderCampaigns(allCampaigns);
+    event.target.value = '';
+}
+
+function renderImagePreviews() {
+    const container = document.getElementById('imagePreviewContainer');
+    const list = document.getElementById('imagePreviewList');
+    
+    if (!container || !list) return;
+    
+    if (selectedImages.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    list.innerHTML = '';
+    
+    selectedImages.forEach((img, index) => {
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+        item.innerHTML = `
+            <img src="${img.url}" alt="${img.name}">
+            <button class="remove-img" onclick="removeImage(${index})" title="Remove image">×</button>
+        `;
+        item.onclick = () => openImageModal(img.url);
+        list.appendChild(item);
+    });
+}
+
+function removeImage(index) {
+    selectedImages.splice(index, 1);
+    renderImagePreviews();
+    updateImageInfo();
+    if (selectedImages.length === 0) {
+        document.getElementById('imageBtn').classList.remove('has-image');
+    }
+}
+
+function clearAllImages() {
+    selectedImages = [];
+    renderImagePreviews();
+    updateImageInfo();
+    document.getElementById('imageBtn').classList.remove('has-image');
+}
+
+function updateImageInfo() {
+    const info = document.getElementById('imageInfo');
+    if (!info) return;
+    
+    if (selectedImages.length > 0) {
+        info.textContent = `${selectedImages.length} image(s) attached`;
+        info.style.display = 'inline';
+    } else {
+        info.textContent = '';
+        info.style.display = 'none';
+    }
+}
+
+// ================= SECTION 6: DRAG & DROP =================
+function setupDragDrop() {
+    const zone = document.getElementById('dragDropZone');
+    if (!zone) return;
+    
+    zone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    zone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) return;
+        
+        // Trigger file input change
+        const input = document.getElementById('imageInput');
+        if (input) {
+            const dt = new DataTransfer();
+            for (const file of files) {
+                dt.items.add(file);
+            }
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change'));
         }
+    });
+    
+    zone.addEventListener('click', function() {
+        const input = document.getElementById('imageInput');
+        if (input) input.click();
+    });
+}
+
+// ================= SECTION 7: PASTE IMAGE =================
+function setupPasteImage() {
+    document.addEventListener('paste', function(e) {
+        const items = e.clipboardData.items;
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                const file = item.getAsFile();
+                const input = document.getElementById('imageInput');
+                if (input) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    input.dispatchEvent(new Event('change'));
+                }
+                showToast('📸 Image pasted', 'success');
+                break;
+            }
+        }
+    });
+}
+
+// ================= SECTION 8: IMAGE MODAL =================
+function openImageModal(src) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('imageModalImg');
+    if (modal && img) {
+        img.src = src;
+        modal.style.display = 'flex';
     }
 }
 
-function clearSearch() {
-    const searchInput = document.getElementById("history_search");
-    if (searchInput) {
-        searchInput.value = "";
-        renderCampaigns(allCampaigns);
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) {
+        modal.style.display = 'none';
     }
-    toggleSearch();
 }
 
-function searchHistory() {
-    const searchTerm = document.getElementById("history_search")?.value.toLowerCase() || "";
-    const filtered = allCampaigns.filter(c => 
-        (c.niche || c.title || "").toLowerCase().includes(searchTerm)
-    );
-    renderCampaigns(filtered);
+// ================= SECTION 9: SEND CHAT WITH IMAGES =================
+async function sendChat() {
+    if (isSending) return;
+    
+    const input = document.getElementById("chat_input");
+    if (!input) return;
+    
+    const message = input.value.trim();
+    
+    if (!message && selectedImages.length === 0) {
+        showToast("Please enter a message or attach an image", "error");
+        return;
+    }
+    
+    isSending = true;
+    
+    // Build text
+    let text = message || "Describe this image";
+    let images = selectedImages.map(img => ({
+        type: img.type,
+        data: img.data
+    }));
+    
+    // Clear input
+    input.value = "";
+    updateCharCount();
+    autoResizeTextarea();
+    
+    // Show user message
+    if (message) {
+        appendMessage("user", message);
+        currentMessages.push({ role: "user", content: message });
+    }
+    
+    // Show images in chat
+    if (images.length > 0) {
+        appendImagesToChat("user", images.map(img => img.url));
+    }
+    
+    showTypingIndicator();
+    
+    try {
+        // If images present, use /chat/image endpoint
+        if (images.length > 0) {
+            // Send first image (or all)
+            const imageUrl = `data:${images[0].type};base64,${images[0].data}`;
+            
+            const response = await fetch(`${API_URL}/chat/image`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text: text,
+                    image_url: imageUrl
+                })
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            const aiResponse = data.response || "I couldn't analyze this image.";
+            
+            hideTypingIndicator();
+            appendMessage("ai", aiResponse);
+            currentMessages.push({ role: "assistant", content: aiResponse });
+            
+            // Save campaign
+            if (!currentCampaign) {
+                // Create campaign from first message
+                const commandResponse = await fetch(`${API_URL}/command`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ command: message || "Image analysis" })
+                });
+                if (commandResponse.ok) {
+                    const cmdData = await commandResponse.json();
+                    currentCampaign = cmdData.campaign_id;
+                }
+            }
+        } else {
+            // Normal chat
+            const url = currentCampaign ? `${API_URL}/chat/${currentCampaign}` : `${API_URL}/command`;
+            const body = currentCampaign ? { message: message } : { command: message };
+            
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!currentCampaign && data.campaign_id) {
+                currentCampaign = data.campaign_id;
+            }
+            
+            let aiResponse = data.response || (data.conversation ? data.conversation[data.conversation.length - 1]?.content : "");
+            
+            if (data.conversation) {
+                currentMessages = data.conversation;
+                renderChat(data.conversation);
+                updateChatTitle(getChatTitle(data.conversation));
+            } else if (aiResponse) {
+                hideTypingIndicator();
+                appendMessage("ai", aiResponse);
+                currentMessages.push({ role: "assistant", content: aiResponse });
+            }
+        }
+        
+        await loadCampaigns();
+        clearAllImages();
+        document.getElementById('imageBtn').classList.remove('has-image');
+        
+    } catch (error) {
+        console.error("Error:", error);
+        showToast("Failed to send message", "error");
+        hideTypingIndicator();
+        appendMessage("ai", "Sorry, I encountered an error. Please try again.");
+    } finally {
+        isSending = false;
+    }
 }
 
-// ================= SECTION 6: LOAD CAMPAIGNS =================
+// ================= SECTION 10: APPEND IMAGES TO CHAT =================
+function appendImagesToChat(role, imageUrls) {
+    const box = document.getElementById("history_result");
+    if (!box) return;
+    
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${role === "user" ? "user" : "ai"}`;
+    
+    const avatar = document.createElement("div");
+    avatar.className = "message-avatar";
+    avatar.innerHTML = role === "user" ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+    
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "message-content";
+    
+    let galleryHtml = '<div class="image-gallery">';
+    imageUrls.forEach(url => {
+        galleryHtml += `<img src="${url}" onclick="openImageModal('${url}')" loading="lazy">`;
+    });
+    galleryHtml += '</div>';
+    
+    contentDiv.innerHTML = galleryHtml;
+    
+    messageDiv.appendChild(avatar);
+    messageDiv.appendChild(contentDiv);
+    box.appendChild(messageDiv);
+    scrollToBottom();
+}
+
+// ================= SECTION 11: TYPING INDICATOR =================
+function showTypingIndicator() {
+    if (isTyping) return;
+    isTyping = true;
+    
+    const box = document.getElementById("history_result");
+    if (!box) return;
+    
+    const indicator = document.createElement("div");
+    indicator.className = "message ai typing-message";
+    indicator.id = "typingIndicator";
+    
+    const avatar = document.createElement("div");
+    avatar.className = "message-avatar";
+    avatar.innerHTML = '<i class="fas fa-robot"></i>';
+    
+    const content = document.createElement("div");
+    content.className = "message-content";
+    content.innerHTML = `
+        <div class="typing-indicator">
+            <span></span><span></span><span></span>
+            <span style="font-size:12px; color:var(--text-secondary); margin-left:8px;">AI is thinking...</span>
+        </div>
+    `;
+    
+    indicator.appendChild(avatar);
+    indicator.appendChild(content);
+    box.appendChild(indicator);
+    scrollToBottom();
+}
+
+function hideTypingIndicator() {
+    isTyping = false;
+    const indicator = document.getElementById("typingIndicator");
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+// ================= SECTION 12: LOAD CAMPAIGNS =================
 async function loadCampaigns() {
     try {
         const response = await fetch(`${API_URL}/campaigns`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
         allCampaigns = data.campaigns || [];
@@ -165,9 +460,7 @@ async function loadCampaigns() {
         
         const totalQuestions = allCampaigns.reduce((sum, c) => sum + (c.questions || 0), 0);
         const totalQuestionsEl = document.getElementById("totalQuestions");
-        if (totalQuestionsEl) {
-            totalQuestionsEl.innerText = totalQuestions;
-        }
+        if (totalQuestionsEl) totalQuestionsEl.innerText = totalQuestions;
         
     } catch (error) {
         console.error("Error loading campaigns:", error);
@@ -183,7 +476,13 @@ function renderCampaigns(campaigns) {
     list.innerHTML = "";
     
     if (!campaigns || campaigns.length === 0) {
-        list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p><p style="font-size:12px">Start a new chat!</p></div>';
+        list.innerHTML = `
+            <div class="empty-history">
+                <i class="fas fa-inbox"></i>
+                <p>No chats yet</p>
+                <p style="font-size:12px; color:var(--text-secondary);">Start a new chat!</p>
+            </div>
+        `;
         return;
     }
     
@@ -213,10 +512,12 @@ function renderCampaigns(campaigns) {
     });
 }
 
-// ================= SECTION 7: NEW CHAT =================
+// ================= SECTION 13: NEW CHAT =================
 function newChat() {
     currentCampaign = null;
     currentMessages = [];
+    selectedImages = [];
+    clearAllImages();
     
     const chatArea = document.getElementById("history_result");
     if (chatArea) chatArea.innerHTML = "";
@@ -225,360 +526,7 @@ function newChat() {
     updateChatTitle("New Conversation");
     closeSidebar();
     removeActiveClass();
-}
-
-function removeActiveClass() {
-    document.querySelectorAll(".chat-item").forEach(item => {
-        item.classList.remove("active");
-    });
-}
-
-// ================= SECTION 8: OPEN CHAT =================
-async function openCampaign(id, element) {
-    try {
-        showToast("Loading chat...", "info");
-        currentCampaign = id;
-        
-        document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
-        if (element) element.classList.add("active");
-        
-        const response = await fetch(`${API_URL}/campaign/${id}`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.conversation) {
-            currentMessages = data.conversation;
-            renderChat(data.conversation);
-            updateChatTitle(data.title || getChatTitle(data.conversation));
-        }
-        
-        closeSidebar();
-        
-    } catch (error) {
-        console.error("Error opening chat:", error);
-        showToast("Failed to open chat", "error");
-    }
-}
-
-// ================= SECTION 9: SEND CHAT =================
-async function sendChat() {
-    const input = document.getElementById("chat_input");
-    if (!input) return;
-    
-    const message = input.value.trim();
-    
-    if (!message) return;
-    
-    if (message.length > 4000) {
-        showToast("Message too long (max 4000 characters)", "error");
-        return;
-    }
-    
-    input.value = "";
-    updateCharCount();
-    autoResizeTextarea();
-    
-    appendMessage("user", message);
-    currentMessages.push({ role: "user", content: message });
-    
-    showTypingIndicator();
-    
-    try {
-        const url = currentCampaign ? `${API_URL}/chat/${currentCampaign}` : `${API_URL}/command`;
-        const body = currentCampaign ? { message: message } : { command: message };
-        
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (!currentCampaign && data.campaign_id) {
-            currentCampaign = data.campaign_id;
-        }
-        
-        let aiResponse = data.response || (data.conversation ? data.conversation[data.conversation.length - 1]?.content : "");
-        
-        if (data.conversation) {
-            currentMessages = data.conversation;
-            renderChat(data.conversation);
-            updateChatTitle(getChatTitle(data.conversation));
-        } else if (aiResponse) {
-            hideTypingIndicator();
-            appendMessage("ai", aiResponse);
-            currentMessages.push({ role: "assistant", content: aiResponse });
-        }
-        
-        await loadCampaigns();
-        
-    } catch (error) {
-        console.error("Error sending message:", error);
-        showToast("Failed to send message", "error");
-        hideTypingIndicator();
-        appendMessage("ai", "Sorry, I encountered an error. Please try again.");
-    }
-}
-
-// ================= SECTION 10: RENDER CHAT =================
-function renderChat(conversation) {
-    const box = document.getElementById("history_result");
-    if (!box) return;
-    
-    box.innerHTML = "";
-    
-    if (!conversation || conversation.length === 0) {
-        showWelcomeMessage();
-        return;
-    }
-    
-    conversation.forEach(msg => {
-        appendMessageToContainer(msg.role, msg.content);
-    });
-    
-    scrollToBottom();
-}
-
-function appendMessage(role, content) {
-    const box = document.getElementById("history_result");
-    if (!box) return;
-    
-    const welcomeMsg = box.querySelector(".welcome-message");
-    if (welcomeMsg) {
-        welcomeMsg.remove();
-    }
-    
-    appendMessageToContainer(role, content);
-    scrollToBottom();
-}
-
-function appendMessageToContainer(role, content) {
-    const box = document.getElementById("history_result");
-    if (!box) return;
-    
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${role === "user" ? "user" : "ai"}`;
-    
-    const avatar = document.createElement("div");
-    avatar.className = "message-avatar";
-    avatar.innerHTML = role === "user" ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
-    
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "message-content";
-    contentDiv.innerHTML = formatMessage(content);
-    
-    // Apply syntax highlighting
-    contentDiv.querySelectorAll('pre code').forEach((block) => {
-        if (typeof hljs !== 'undefined') {
-            hljs.highlightElement(block);
-        }
-    });
-    
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(contentDiv);
-    box.appendChild(messageDiv);
-}
-
-// ================= SECTION 11: MESSAGE FORMATTER =================
-function formatMessage(content) {
-    if (!content) return "";
-    
-    let formatted = content;
-    
-    // Check if already formatted (avoid double formatting)
-    const hasBlogCard = formatted.includes('class="blog-card"');
-    const hasBlogBtn = formatted.includes('class="blog-btn"');
-    const hasBlogPublished = formatted.includes('blog-published');
-    const hasAnchor = formatted.includes('<a href') && formatted.includes('target="_blank"');
-    
-    if (hasBlogCard || hasBlogBtn || hasBlogPublished || hasAnchor) {
-        return formatted;
-    }
-    
-    // Convert blog URLs to cards
-    const blogRegex = /(https?:\/\/[^\s<]+?\/blog\/[^\s<]+)/g;
-    formatted = formatted.replace(blogRegex, (url) => {
-        return `<div class="blog-card">
-                    <a href="${url}" target="_blank" rel="noopener noreferrer" class="blog-btn">
-                        <i class="fas fa-book-open"></i> 📖 पूरा ब्लॉग पढ़ें →
-                    </a>
-                    <span class="blog-url">${url}</span>
-                </div>`;
-    });
-    
-    // Convert other URLs to links
-    const urlRegex = /(https?:\/\/[^\s<]+)(?![^<]*>)/g;
-    formatted = formatted.replace(urlRegex, (url) => {
-        if (url.includes('/blog/')) return url;
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="link">🔗 ${url}</a>`;
-    });
-    
-    // Code blocks
-    formatted = formatted.replace(/```(\w*)\n([\s\S]*?)```/g, (match, lang, code) => {
-        return `<pre><code class="language-${lang || 'plaintext'}">${escapeHtml(code.trim())}</code></pre>`;
-    });
-    
-    // Inline code
-    formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-    
-    // Bold
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
-    // Italic
-    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    
-    // Headings
-    formatted = formatted.replace(/^### (.*?)$/gm, '<h3>$1</h3>');
-    formatted = formatted.replace(/^## (.*?)$/gm, '<h2>$1</h2>');
-    formatted = formatted.replace(/^# (.*?)$/gm, '<h1>$1</h1>');
-    
-    // Line breaks
-    formatted = formatted.replace(/\n/g, '<br>');
-    
-    return formatted;
-}
-
-// ================= SECTION 12: TYPING INDICATOR =================
-function showTypingIndicator() {
-    if (isTyping) return;
-    isTyping = true;
-    
-    const box = document.getElementById("history_result");
-    if (!box) return;
-    
-    const indicator = document.createElement("div");
-    indicator.className = "message ai typing-message";
-    indicator.id = "typingIndicator";
-    
-    const avatar = document.createElement("div");
-    avatar.className = "message-avatar";
-    avatar.innerHTML = '<i class="fas fa-robot"></i>';
-    
-    const content = document.createElement("div");
-    content.className = "message-content";
-    content.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
-    
-    indicator.appendChild(avatar);
-    indicator.appendChild(content);
-    box.appendChild(indicator);
-    scrollToBottom();
-}
-
-function hideTypingIndicator() {
-    isTyping = false;
-    const indicator = document.getElementById("typingIndicator");
-    if (indicator) {
-        indicator.remove();
-    }
-}
-
-// ================= SECTION 13: CHAT MANAGEMENT =================
-async function deleteChat(id) {
-    if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
-    
-    try {
-        const response = await fetch(`${API_URL}/campaign/delete/${id}`, { method: "DELETE" });
-        
-        if (response.ok) {
-            await loadCampaigns();
-            if (currentCampaign === id) {
-                newChat();
-            }
-            showToast("Chat deleted successfully", "success");
-        } else {
-            throw new Error("Delete failed");
-        }
-    } catch (error) {
-        console.error("Error deleting chat:", error);
-        showToast("Failed to delete chat", "error");
-    }
-}
-
-async function renameChat(id) {
-    const newName = prompt("Enter new chat name:", "Chat");
-    if (!newName || newName.trim() === "") return;
-    
-    try {
-        const response = await fetch(`${API_URL}/campaign/rename/${id}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name: newName.trim() })
-        });
-        
-        if (response.ok) {
-            await loadCampaigns();
-            showToast("Chat renamed successfully", "success");
-            if (currentCampaign === id) {
-                updateChatTitle(newName.trim());
-            }
-        } else {
-            throw new Error("Rename failed");
-        }
-    } catch (error) {
-        console.error("Error renaming chat:", error);
-        showToast("Failed to rename chat", "error");
-    }
-}
-
-async function clearAllChats() {
-    if (!confirm("⚠️ This will delete ALL chats. This action cannot be undone. Continue?")) return;
-    
-    try {
-        for (const campaign of allCampaigns) {
-            await fetch(`${API_URL}/campaign/delete/${campaign.id}`, { method: "DELETE" });
-        }
-        await loadCampaigns();
-        newChat();
-        showToast("All chats cleared successfully", "success");
-    } catch (error) {
-        console.error("Error clearing chats:", error);
-        showToast("Failed to clear chats", "error");
-    }
-}
-
-function exportChat() {
-    if (!currentMessages || currentMessages.length === 0) {
-        showToast("No messages to export", "error");
-        return;
-    }
-    
-    const exportData = {
-        title: document.getElementById("chatTitle")?.innerText || "Chat",
-        date: new Date().toISOString(),
-        messages: currentMessages
-    };
-    
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `chat_export_${Date.now()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast("Chat exported successfully", "success");
-}
-
-function clearCurrentChat() {
-    if (!currentMessages || currentMessages.length === 0) {
-        showToast("No messages to clear", "error");
-        return;
-    }
-    
-    if (confirm("Clear all messages in current chat?")) {
-        currentMessages = [];
-        renderChat([]);
-        showWelcomeMessage();
-        showToast("Chat cleared", "success");
-    }
+    document.getElementById('imageBtn').classList.remove('has-image');
 }
 
 // ================= SECTION 14: VOICE INPUT =================
@@ -623,89 +571,7 @@ function startVoice() {
     recognition.start();
 }
 
-// ================= SECTION 15: COMMAND & STATS =================
-function setCommand(command) {
-    const input = document.getElementById("chat_input");
-    if (input) {
-        input.value = command;
-        updateCharCount();
-        sendChat();
-    }
-}
-
-function showStats() {
-    const totalMessages = currentMessages.length;
-    const userMessages = currentMessages.filter(m => m.role === "user").length;
-    const aiMessages = currentMessages.filter(m => m.role === "assistant").length;
-    const questions = currentMessages.filter(m => m.role === "user" && 
-        (m.content.includes("?") || /(kya|kaise|kyu|kahan)/i.test(m.content))).length;
-    
-    const statTotal = document.getElementById("statTotalMessages");
-    const statQuestions = document.getElementById("statTotalQuestions");
-    const statAi = document.getElementById("statAiMessages");
-    const modal = document.getElementById("statsModal");
-    
-    if (statTotal) statTotal.innerText = totalMessages;
-    if (statQuestions) statQuestions.innerText = questions;
-    if (statAi) statAi.innerText = aiMessages;
-    if (modal) modal.style.display = "flex";
-}
-
-function closeStats() {
-    const modal = document.getElementById("statsModal");
-    if (modal) modal.style.display = "none";
-}
-
-// ================= SECTION 16: HELPER FUNCTIONS =================
-function showWelcomeMessage() {
-    const box = document.getElementById("history_result");
-    if (!box) return;
-    
-    if (box.children.length === 0) {
-        box.innerHTML = `
-            <div class="welcome-message">
-                <div class="welcome-icon">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h2>Welcome to AI Ultimate Pro</h2>
-                <p>Your intelligent assistant, ready to help you anytime</p>
-                <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                    <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
-                    <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
-                    <button class="suggestion-chip" onclick="setCommand('Aur batao')">💬 Aur batao</button>
-                    <button class="suggestion-chip" onclick="setCommand('Blog banao car ke baare mein')">📝 Blog banao</button>
-                </div>
-            </div>
-        `;
-    }
-}
-
-function updateChatTitle(title) {
-    const titleElement = document.getElementById("chatTitle");
-    if (titleElement) {
-        titleElement.textContent = title;
-    }
-}
-
-function getChatTitle(conversation) {
-    if (!conversation || conversation.length === 0) return "New Conversation";
-    const firstUserMsg = conversation.find(msg => msg.role === "user");
-    if (firstUserMsg) {
-        const title = firstUserMsg.content.substring(0, 30);
-        return title.length === 30 ? title + "..." : title;
-    }
-    return "Untitled Chat";
-}
-
-function scrollToBottom() {
-    setTimeout(() => {
-        const box = document.getElementById("history_result");
-        if (box) {
-            box.scrollTop = box.scrollHeight;
-        }
-    }, 100);
-}
-
+// ================= SECTION 15: HELPER FUNCTIONS =================
 function escapeHtml(text) {
     const div = document.createElement("div");
     div.textContent = text;
@@ -721,283 +587,81 @@ function showToast(message, type = "info") {
     `;
     document.body.appendChild(toast);
     setTimeout(() => {
-        toast.style.animation = "slideInRight 0.3s reverse";
+        toast.style.animation = "slideUp 0.3s reverse";
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-// ================= SECTION 17: CLICK OUTSIDE HANDLER =================
-document.addEventListener("click", (e) => {
-    // Sidebar close on outside click (mobile)
+function updateCharCount() {
+    const textarea = document.getElementById("chat_input");
+    const counter = document.querySelector(".char-counter");
+    if (textarea && counter) {
+        const count = textarea.value.length;
+        counter.textContent = `${count} / 4000`;
+        const sendBtn = document.getElementById("sendBtn");
+        if (sendBtn) {
+            sendBtn.disabled = count === 0 && selectedImages.length === 0;
+        }
+    }
+}
+
+function autoResizeTextarea() {
+    const textarea = document.getElementById("chat_input");
+    if (textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
+    }
+}
+
+function setupAutoResize() {
+    const textarea = document.getElementById("chat_input");
+    if (textarea) {
+        textarea.addEventListener("input", autoResizeTextarea);
+    }
+}
+
+function scrollToBottom() {
+    setTimeout(() => {
+        const box = document.getElementById("history_result");
+        if (box) box.scrollTop = box.scrollHeight;
+    }, 100);
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    if (sidebar) sidebar.classList.toggle("open");
+}
+
+function closeSidebar() {
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById("sidebar");
-        const menuToggle = document.getElementById("menuToggle");
-        if (sidebar && sidebar.classList.contains("open")) {
-            if (!sidebar.contains(e.target) && !menuToggle?.contains(e.target)) {
-                sidebar.classList.remove("open");
-            }
-        }
-    }
-    
-    // Modal close on outside click
-    const modal = document.getElementById("statsModal");
-    if (modal && modal.style.display === "flex") {
-        if (!modal.contains(e.target) || e.target.classList.contains("modal-close")) {
-            closeStats();
-        }
-    }
-});
-
-// ================= SECTION 18: EXPORTS (if needed) =================
-// Functions are globally available via window object
-
-
-
-// ====================================================================
-// SECTION 19: HEALTH SERVICE FUNCTIONS (NEW)
-// ====================================================================
-
-// Health Service Variables
-let healthCheckInterval = null;
-let currentHealthStatus = 'healthy';
-
-function addHealthIndicator() {
-    const sidebarFooter = document.querySelector('.sidebar-footer');
-    if (!sidebarFooter) return;
-    
-    const healthDiv = document.createElement('div');
-    healthDiv.className = 'health-indicator health-healthy';
-    healthDiv.id = 'healthIndicator';
-    healthDiv.onclick = () => showHealthModal();
-    healthDiv.innerHTML = `
-        <i class="fas fa-heartbeat"></i>
-        <span id="healthStatus">✅ System Healthy</span>
-    `;
-    
-    sidebarFooter.insertBefore(healthDiv, sidebarFooter.firstChild);
-
-    // ================= MOBILE INDICATOR (NEW) =================
-    const mobileIndicator = document.getElementById('mobileHealthIndicator');
-    if (mobileIndicator) {
-        mobileIndicator.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+        if (sidebar) sidebar.classList.remove("open");
     }
 }
 
-function startHealthCheckInterval() {
-    if (healthCheckInterval) clearInterval(healthCheckInterval);
-    checkSystemHealth();
-    healthCheckInterval = setInterval(checkSystemHealth, 30000);
+function removeActiveClass() {
+    document.querySelectorAll(".chat-item").forEach(item => {
+        item.classList.remove("active");
+    });
 }
 
-async function checkSystemHealth() {
-    try {
-        const response = await fetch(`${API_URL}/health/quick`);
-        if (!response.ok) throw new Error('Health check failed');
-        
-        const data = await response.json();
-        currentHealthStatus = data.status;
-        updateHealthIndicator(data);
-    } catch (error) {
-        console.error('Health check error:', error);
-        updateHealthIndicator({ status: 'error', emoji: '❌', critical: 0 });
+function updateChatTitle(title) {
+    const titleElement = document.getElementById("chatTitle");
+    if (titleElement) titleElement.textContent = title;
+}
+
+function getChatTitle(conversation) {
+    if (!conversation || conversation.length === 0) return "New Conversation";
+    const firstUserMsg = conversation.find(msg => msg.role === "user");
+    if (firstUserMsg) {
+        const title = firstUserMsg.content.substring(0, 30);
+        return title.length === 30 ? title + "..." : title;
     }
+    return "Untitled Chat";
 }
 
-function updateHealthIndicator(data) {
-    const indicator = document.getElementById('healthIndicator');
-    const statusSpan = document.getElementById('healthStatus');
-    if (!indicator || !statusSpan) return;
-    
-    indicator.className = `health-indicator health-${data.status}`;
-    
-    const messages = {
-        'healthy': '✅ System Healthy',
-        'warning': `⚠️ ${data.critical || 0} Warnings`,
-        'critical': `🔴 ${data.critical || 0} Critical`,
-        'error': '❌ Offline'
-    };
-    
-    statusSpan.textContent = messages[data.status] || '❓ Unknown';
-
-    // ================= MOBILE INDICATOR UPDATE (NEW) =================
-    const mobileIndicator = document.getElementById('mobileHealthIndicator');
-    const mobileStatus = document.getElementById('mobileHealthStatus');
-    if (mobileIndicator && mobileStatus) {
-        mobileIndicator.className = `mobile-health-indicator health-${data.status}`;
-        const short = { 'healthy':'✅', 'warning':`⚠️${data.critical||''}`, 'critical':`🔴${data.critical||''}`, 'error':'❌' };
-        mobileStatus.textContent = short[data.status] || '🏥';
-    }
-}
-
-async function showHealthModal() {
-    showToast('Loading health report...', 'info');
-    
-    try {
-        const response = await fetch(`${API_URL}/health/full`);
-        if (!response.ok) throw new Error('Failed to load report');
-        
-        const report = await response.json();
-        
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.id = 'healthModal';
-        modal.style.display = 'flex';
-        
-        let criticalHtml = '';
-        report.problems.critical.slice(0, 5).forEach(p => {
-            criticalHtml += `
-                <div class="health-problem critical">
-                    <div class="problem-location"><i class="fas fa-times-circle"></i> ${p.location}</div>
-                    <div class="problem-issue">${p.issue}</div>
-                    ${p.fix ? `<div class="problem-fix">💡 ${p.fix}</div>` : ''}
-                </div>
-            `;
-        });
-        
-        let warningsHtml = '';
-        report.problems.warnings.slice(0, 5).forEach(p => {
-            warningsHtml += `
-                <div class="health-problem warning">
-                    <div class="problem-location"><i class="fas fa-exclamation-triangle"></i> ${p.location}</div>
-                    <div class="problem-issue">${p.issue}</div>
-                    ${p.fix ? `<div class="problem-fix">💡 ${p.fix}</div>` : ''}
-                </div>
-            `;
-        });
-        
-        modal.innerHTML = `
-            <div class="modal-content health-modal-content">
-                <div class="modal-header">
-                    <h3><i class="fas fa-heartbeat"></i> System Health Report</h3>
-                    <button class="modal-close" onclick="closeHealthModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="health-overall ${report.overall_status}">
-                        <span class="health-emoji">${report.overall_emoji}</span>
-                        <span class="health-status">${report.overall}</span>
-                    </div>
-                    
-                    <div class="health-summary">
-                        <div class="summary-card">
-                            <span class="summary-value">${report.stats.files}</span>
-                            <span class="summary-label">Files</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-value">${report.stats.functions}</span>
-                            <span class="summary-label">Functions</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-value">${report.stats.tables}</span>
-                            <span class="summary-label">Tables</span>
-                        </div>
-                        <div class="summary-card">
-                            <span class="summary-value">${report.stats.columns}</span>
-                            <span class="summary-label">Columns</span>
-                        </div>
-                    </div>
-                    
-                    ${report.stats.critical > 0 ? `
-                    <div class="health-section">
-                        <h4><i class="fas fa-times-circle" style="color: #ef4444;"></i> Critical Issues (${report.stats.critical})</h4>
-                        ${criticalHtml || '<p class="no-issues">No critical issues</p>'}
-                    </div>
-                    ` : ''}
-                    
-                    ${report.stats.warnings > 0 ? `
-                    <div class="health-section">
-                        <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Warnings (${report.stats.warnings})</h4>
-                        ${warningsHtml || '<p class="no-issues">No warnings</p>'}
-                    </div>
-                    ` : ''}
-                    
-                    ${report.stats.critical === 0 && report.stats.warnings === 0 ? `
-                    <div class="health-section">
-                        <p class="all-good"><i class="fas fa-check-circle" style="color: #10b981;"></i> All systems operational!</p>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="health-discovered">
-                        <p><strong>📁 Files:</strong> ${report.discovered.files.slice(0, 6).join(', ')}${report.discovered.files.length > 6 ? '...' : ''}</p>
-                        <p><strong>🗄️ Tables:</strong> ${report.discovered.tables.join(', ')}</p>
-                    </div>
-                    
-                    <div class="health-actions">
-                        <button class="health-btn primary" onclick="runAutoFix()">
-                            <i class="fas fa-wrench"></i> Auto-Fix Issues
-                        </button>
-                        <button class="health-btn secondary" onclick="refreshHealthModal()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                    
-                    <p class="health-timestamp">Last checked: ${new Date(report.timestamp).toLocaleString()}</p>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-    } catch (error) {
-        console.error('Health modal error:', error);
-        showToast('Failed to load health report', 'error');
-    }
-}
-
-function closeHealthModal() {
-    const modal = document.getElementById('healthModal');
-    if (modal) modal.remove();
-}
-
-async function refreshHealthModal() {
-    closeHealthModal();
-    await checkSystemHealth();
-    showHealthModal();
-}
-
-async function runAutoFix() {
-    showToast('Running auto-fix...', 'info');
-    
-    try {
-        const response = await fetch(`${API_URL}/health/fix`, { method: 'POST' });
-        const data = await response.json();
-        
-        if (data.fixes && data.fixes.length > 0) {
-            let fixMsg = '';
-            data.fixes.slice(0, 3).forEach(f => { fixMsg += f + ' '; });
-            showToast(`✅ ${fixMsg}`, 'success');
-        } else {
-            showToast('✅ No issues to fix', 'success');
-        }
-        
-        setTimeout(() => {
-            closeHealthModal();
-            checkSystemHealth();
-        }, 1500);
-        
-    } catch (error) {
-        showToast('❌ Auto-fix failed', 'error');
-    }
-}
-
-// Initialize health check on page load
-(function initHealthCheck() {
-    setTimeout(() => {
-        addHealthIndicator();
-        startHealthCheckInterval();
-    }, 1000);
-})();
-
-// Patch click handler for health modal
-document.addEventListener('click', function(e) {
-    const healthModal = document.getElementById('healthModal');
-    if (healthModal && healthModal.style.display === 'flex') {
-        const modalContent = healthModal.querySelector('.modal-content');
-        const closeBtn = healthModal.querySelector('.modal-close');
-        
-        if (closeBtn && (e.target === closeBtn || closeBtn.contains(e.target))) {
-            closeHealthModal();
-        } else if (modalContent && !modalContent.contains(e.target)) {
-            closeHealthModal();
-        }
-    }
-});
+// ================= SECTION 16: SHORTCUTS =================
+console.log("🔄 Shortcuts:");
+console.log("  Ctrl + N - New Chat");
+console.log("  Ctrl + I - Upload Image");
+console.log("  Ctrl + V - Paste Image");
