@@ -1,5 +1,5 @@
 // ====================================================================
-// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT
+// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT + HISTORY FIX
 // ====================================================================
 
 const API_URL = "https://umar-k20u.onrender.com";
@@ -652,9 +652,29 @@ function clearSearch() {
     if (searchBox) searchBox.style.display = "none";
 }
 
-function deleteChat(id) {
-    if (!confirm("Are you sure you want to delete this chat?")) return;
-    // Implementation
+// ================= 🔥 FIXED: DELETE CHAT =================
+async function deleteChat(id) {
+    if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/campaign/delete/${id}`, {
+            method: "DELETE"
+        });
+        
+        if (response.ok) {
+            showToast("Chat deleted successfully", "success");
+            await loadCampaigns();  // ✅ Refresh list
+            
+            if (currentCampaign === id) {
+                newChat();  // ✅ New chat
+            }
+        } else {
+            throw new Error("Delete failed");
+        }
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        showToast("Failed to delete chat", "error");
+    }
 }
 
 function renameChat(id) {
