@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Ultimate Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI Ultimate Pro – Smart Assistant</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 </head>
@@ -20,7 +18,6 @@
             <div class="logo">
                 <i class="fas fa-brain"></i>
                 <h2>AI Ultimate Pro</h2>
-                <span class="logo-badge">v3.0</span>
             </div>
             <button class="new-chat-btn" onclick="newChat()">
                 <i class="fas fa-plus"></i>
@@ -44,7 +41,7 @@
             <div id="search_history_box" class="search-box" style="display: none;">
                 <div class="search-input-wrapper">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="history_search" placeholder="🔍 Search chats..." onkeyup="searchHistory()">
+                    <input type="text" id="history_search" placeholder="🔍 Search chats by name..." onkeyup="searchHistory()">
                     <button class="search-clear" onclick="clearSearch()">×</button>
                 </div>
             </div>
@@ -75,17 +72,17 @@
             </button>
             <div id="mobileHealthIndicator" class="mobile-health-indicator" onclick="showHealthModal()" style="display: none;">
                 <i class="fas fa-heartbeat"></i>
-                <span id="mobileHealthStatus">✅</span>
+                <span id="mobileHealthStatus">🏥</span>
             </div>
             <div class="chat-info">
                 <i class="fas fa-comment-dots"></i>
                 <span id="chatTitle">New Conversation</span>
             </div>
             <div class="chat-actions">
-                <button class="action-btn" onclick="exportChat()" title="Export">
+                <button class="action-btn" onclick="exportChat()" title="Export Chat">
                     <i class="fas fa-download"></i>
                 </button>
-                <button class="action-btn" onclick="clearCurrentChat()" title="Clear">
+                <button class="action-btn" onclick="clearCurrentChat()" title="Clear Chat">
                     <i class="fas fa-eraser"></i>
                 </button>
             </div>
@@ -94,7 +91,6 @@
         <div id="history_result" class="chat-area"></div>
 
         <div class="chat-input-container">
-            <!-- Suggestions -->
             <div class="suggestions-bar" id="suggestionsBar">
                 <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
                 <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
@@ -102,7 +98,7 @@
                 <button class="suggestion-chip" onclick="setCommand('Blog banao car ke baare mein')">📝 Blog banao</button>
             </div>
 
-            <!-- DRAG & DROP ZONE -->
+            <!-- 🔥 NEW: DRAG & DROP ZONE -->
             <div class="drag-drop-zone" id="dragDropZone">
                 <div class="drag-drop-content">
                     <i class="fas fa-cloud-upload-alt"></i>
@@ -112,25 +108,25 @@
                 <input type="file" id="imageInput" accept="image/*" multiple style="display:none">
             </div>
 
-            <!-- IMAGE PREVIEW -->
+            <!-- 🔥 NEW: IMAGE PREVIEW -->
             <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
                 <div class="image-preview-list" id="imagePreviewList"></div>
                 <div class="image-preview-actions">
-                    <button onclick="clearAllImages()" class="clear-images-btn" title="Remove all">
+                    <button onclick="clearAllImages()" class="clear-images-btn" title="Remove all images">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- INPUT -->
             <div class="input-wrapper">
                 <textarea 
                     id="chat_input" 
-                    placeholder="Type your message here..." 
+                    placeholder="Type your message here... (Press Enter to send)" 
                     rows="1"
                     maxlength="4000"
                 ></textarea>
                 <div class="input-actions">
+                    <!-- 🔥 NEW: IMAGE BUTTON -->
                     <button id="imageBtn" onclick="document.getElementById('imageInput').click()" class="image-btn" title="Attach Image">
                         <i class="fas fa-image"></i>
                     </button>
@@ -142,10 +138,9 @@
                     </button>
                 </div>
             </div>
-            
             <div class="input-footer">
                 <span class="char-counter">0 / 4000</span>
-                <span class="info-text"><i class="fas fa-keyboard"></i> Shift+Enter</span>
+                <span class="info-text"><i class="fas fa-keyboard"></i> Shift + Enter for new line</span>
                 <span class="image-info" id="imageInfo"></span>
             </div>
         </div>
@@ -156,7 +151,7 @@
 <div id="statsModal" class="modal" style="display: none;">
     <div class="modal-content">
         <div class="modal-header">
-            <h3><i class="fas fa-chart-line"></i> Stats</h3>
+            <h3><i class="fas fa-chart-line"></i> Chat Statistics</h3>
             <button class="modal-close" onclick="closeStats()">&times;</button>
         </div>
         <div class="modal-body" id="statsContent">
@@ -185,7 +180,7 @@
     </div>
 </div>
 
-<!-- ================= IMAGE MODAL ================= -->
+<!-- 🔥 NEW: IMAGE MODAL -->
 <div id="imageModal" class="modal image-modal" style="display: none;">
     <div class="image-modal-content">
         <button class="image-modal-close" onclick="closeImageModal()">&times;</button>
@@ -196,4 +191,4 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="script.js"></script>
 </body>
-</html>
+                    </html>
