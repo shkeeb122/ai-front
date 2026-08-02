@@ -1,5 +1,5 @@
 // ====================================================================
-// 📁 FILE: script.js - COMPLETE WORKING WITH IMAGE SUPPORT
+// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT
 // ====================================================================
 
 const API_URL = "https://umar-k20u.onrender.com";
@@ -22,8 +22,7 @@ window.onload = () => {
         showWelcomeMessage();
         setupDragDrop();
         setupPasteImage();
-        console.log("✅ AI Ultimate Pro loaded!");
-        console.log("🔑 Shortcuts: Ctrl+N = New Chat, Ctrl+I = Image, Ctrl+V = Paste");
+        console.log("✅ App initialized with image support");
     } catch (error) {
         console.error("❌ Init error:", error);
         showToast("Failed to initialize app", "error");
@@ -125,7 +124,7 @@ function renderImagePreviews() {
         item.className = 'image-preview-item';
         item.innerHTML = `
             <img src="${img.url}" alt="${img.name}" loading="lazy">
-            <button class="remove-img" onclick="removeImage(${index})" title="Remove image">×</button>
+            <button class="remove-img" onclick="removeImage(${index})">×</button>
         `;
         item.onclick = (e) => {
             if (!e.target.closest('.remove-img')) {
@@ -447,12 +446,7 @@ function showTypingIndicator() {
     
     const content = document.createElement("div");
     content.className = "message-content";
-    content.innerHTML = `
-        <div class="typing-indicator">
-            <span></span><span></span><span></span>
-            <span class="typing-text">AI is thinking...</span>
-        </div>
-    `;
+    content.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
     
     indicator.appendChild(avatar);
     indicator.appendChild(content);
@@ -504,7 +498,7 @@ function renderCampaigns(campaigns) {
     if (!list) return;
     list.innerHTML = "";
     if (!campaigns || campaigns.length === 0) {
-        list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p><p style="font-size:12px;color:var(--text-secondary)">Start a new chat!</p></div>';
+        list.innerHTML = '<div class="empty-history"><i class="fas fa-inbox"></i><p>No chats yet</p><p style="font-size:12px">Start a new chat!</p></div>';
         return;
     }
     campaigns.forEach(campaign => {
@@ -516,8 +510,8 @@ function renderCampaigns(campaigns) {
                 <div class="chat-item-preview">${campaign.messages || 0} msgs • ${campaign.questions || 0} Qs</div>
             </div>
             <div class="chat-item-buttons">
-                <button onclick="event.stopPropagation(); renameChat('${campaign.id}')" title="Rename"><i class="fas fa-edit"></i></button>
-                <button onclick="event.stopPropagation(); deleteChat('${campaign.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+                <button onclick="event.stopPropagation(); renameChat('${campaign.id}')"><i class="fas fa-edit"></i></button>
+                <button onclick="event.stopPropagation(); deleteChat('${campaign.id}')"><i class="fas fa-trash"></i></button>
             </div>
         `;
         div.onclick = (e) => {
@@ -545,7 +539,6 @@ function newChat() {
 }
 
 function openCampaign(id, element) {
-    showToast("Loading chat...", "info");
     // Implementation
 }
 
@@ -713,7 +706,7 @@ function showToast(message, type = "info") {
     toast.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"}"></i><span>${escapeHtml(message)}</span>`;
     document.body.appendChild(toast);
     setTimeout(() => {
-        toast.style.animation = "slideUp 0.3s reverse";
+        toast.style.animation = "slideInRight 0.3s reverse";
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
@@ -749,7 +742,7 @@ function scrollToBottom() {
     }, 150);
 }
 
-// ================= HEALTH MODAL =================
+// ================= HEALTH =================
 function showHealthModal() {
     showToast("System Healthy ✅", "success");
 }
@@ -783,5 +776,5 @@ document.addEventListener("click", (e) => {
     }
 });
 
-console.log("✅ AI Ultimate Pro loaded!");
+console.log("✅ AI Ultimate Pro loaded with image support!");
 console.log("🔑 Shortcuts: Ctrl+N = New Chat, Ctrl+I = Image, Ctrl+V = Paste");
