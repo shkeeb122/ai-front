@@ -1,5 +1,5 @@
 // ====================================================================
-// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT + HISTORY FIX
+// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT + OPEN CHAT FIX
 // ====================================================================
 
 const API_URL = "https://umar-k20u.onrender.com";
@@ -538,8 +538,42 @@ function newChat() {
     document.getElementById('imageBtn').classList.remove('has-image');
 }
 
-function openCampaign(id, element) {
-    // Implementation
+// ================= 🔥 FIXED: OPEN CAMPAIGN =================
+async function openCampaign(id, element) {
+    try {
+        // Show loading
+        showToast("Loading chat...", "info");
+        
+        // Set current campaign
+        currentCampaign = id;
+        
+        // Update active class
+        document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
+        if (element) element.classList.add("active");
+        
+        // Fetch chat history
+        const response = await fetch(`${API_URL}/campaign/${id}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Render conversation
+        if (data.conversation) {
+            currentMessages = data.conversation;
+            renderChat(data.conversation);
+            updateChatTitle(data.title || getChatTitle(data.conversation));
+        }
+        
+        // Close sidebar on mobile
+        closeSidebar();
+        
+    } catch (error) {
+        console.error("Error opening chat:", error);
+        showToast("Failed to open chat", "error");
+    }
 }
 
 function removeActiveClass() {
@@ -652,7 +686,7 @@ function clearSearch() {
     if (searchBox) searchBox.style.display = "none";
 }
 
-// ================= 🔥 FIXED: DELETE CHAT =================
+// ================= DELETE CHAT =================
 async function deleteChat(id) {
     if (!confirm("Are you sure you want to delete this chat? This cannot be undone.")) return;
     
@@ -663,10 +697,9 @@ async function deleteChat(id) {
         
         if (response.ok) {
             showToast("Chat deleted successfully", "success");
-            await loadCampaigns();  // ✅ Refresh list
-            
+            await loadCampaigns();
             if (currentCampaign === id) {
-                newChat();  // ✅ New chat
+                newChat();
             }
         } else {
             throw new Error("Delete failed");
