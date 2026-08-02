@@ -73,7 +73,7 @@
             </button>
             <div id="mobileHealthIndicator" class="mobile-health-indicator" onclick="showHealthModal()" style="display: none;">
                 <i class="fas fa-heartbeat"></i>
-                <span id="mobileHealthStatus">🏥</span>
+                <span id="mobileHealthStatus">✅</span>
             </div>
             <div class="chat-info">
                 <i class="fas fa-comment-dots"></i>
@@ -91,10 +91,7 @@
 
         <div id="history_result" class="chat-area"></div>
 
-        <!-- ================= IMAGE UPLOAD AREA ================= -->
         <div class="chat-input-container">
-            
-            <!-- Suggestions -->
             <div class="suggestions-bar" id="suggestionsBar">
                 <button class="suggestion-chip" onclick="setCommand('Maine kitne sawal kiye?')">📊 Kitne sawal?</button>
                 <button class="suggestion-chip" onclick="setCommand('Pehle kya hua tha?')">📜 Pehle kya hua?</button>
@@ -114,9 +111,7 @@
 
             <!-- 🔥 IMAGE PREVIEW CONTAINER -->
             <div id="imagePreviewContainer" class="image-preview-container" style="display: none;">
-                <div class="image-preview-list" id="imagePreviewList">
-                    <!-- Dynamic previews -->
-                </div>
+                <div class="image-preview-list" id="imagePreviewList"></div>
                 <div class="image-preview-actions">
                     <button onclick="clearAllImages()" class="clear-images-btn" title="Remove all images">
                         <i class="fas fa-times"></i>
@@ -133,7 +128,6 @@
                     maxlength="4000"
                 ></textarea>
                 <div class="input-actions">
-                    <!-- 🔥 IMAGE BUTTON -->
                     <button id="imageBtn" onclick="document.getElementById('imageInput').click()" class="image-btn" title="Attach Image">
                         <i class="fas fa-image"></i>
                     </button>
