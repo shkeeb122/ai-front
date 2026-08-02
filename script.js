@@ -1,5 +1,6 @@
 // ====================================================================
-// 📁 FILE: script.js - PEHLI WALI + IMAGE SUPPORT + OPEN CHAT FIX
+// 📁 FILE: script.js - COMPLETE WORKING (IMAGE FIXED)
+// 🎯 IMAGE UPLOAD: Ek baar select karne par kaam karega
 // ====================================================================
 
 const API_URL = "https://umar-k20u.onrender.com";
@@ -55,10 +56,11 @@ function setupEventListeners() {
         imageInput.addEventListener("change", handleImageUpload);
     }
     
+    // 🔥 FIX: once: true - Sirf ek baar trigger hoga
     if (imageBtn) {
         imageBtn.addEventListener("click", () => {
             if (imageInput) imageInput.click();
-        });
+        }, { once: true });
     }
     
     document.addEventListener("keydown", function(e) {
@@ -103,6 +105,8 @@ function handleImageUpload(event) {
         };
         reader.readAsDataURL(file);
     }
+    
+    // Reset input
     event.target.value = '';
 }
 
@@ -538,20 +542,16 @@ function newChat() {
     document.getElementById('imageBtn').classList.remove('has-image');
 }
 
-// ================= 🔥 FIXED: OPEN CAMPAIGN =================
+// ================= OPEN CAMPAIGN =================
 async function openCampaign(id, element) {
     try {
-        // Show loading
         showToast("Loading chat...", "info");
         
-        // Set current campaign
         currentCampaign = id;
         
-        // Update active class
         document.querySelectorAll(".chat-item").forEach(i => i.classList.remove("active"));
         if (element) element.classList.add("active");
         
-        // Fetch chat history
         const response = await fetch(`${API_URL}/campaign/${id}`);
         
         if (!response.ok) {
@@ -560,14 +560,12 @@ async function openCampaign(id, element) {
         
         const data = await response.json();
         
-        // Render conversation
         if (data.conversation) {
             currentMessages = data.conversation;
             renderChat(data.conversation);
             updateChatTitle(data.title || getChatTitle(data.conversation));
         }
         
-        // Close sidebar on mobile
         closeSidebar();
         
     } catch (error) {
